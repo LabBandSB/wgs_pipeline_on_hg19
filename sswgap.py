@@ -1,11 +1,11 @@
 """
 example:
     #  check run options
-    python sswgap.py
+    python sswgsap.py
 
 
     # initial config generation
-    python sswgap.py \\
+    python sswgsap.py \\
         --project_root ~/projects/KAZ_WG/KAZ_WG_hg19 \\
         --fastq_dirs_list ~/icebox/fastq_gz/KAZ_WG/ \\
         --sample_delimiter . \\
@@ -21,7 +21,7 @@ example:
     # precise config tuning
 
     # scripts generation
-    python sswgap.py -j ~/projects/KAZ_WG/KAZ_WG_hg19/scripts/default_settings.json
+    python sswgsap.py -j ~/projects/KAZ_WG/KAZ_WG_hg19/scripts/default_settings.json
 
     # submit scripts to workload manager
 
@@ -153,7 +153,7 @@ def save_settings(settings):
     print(f"# ls  {settings['project_script_dir']}")
     print(f"# cat {json_file}")
     print(f"# vi  {json_file}")
-    print(f"# python sswgap.py -j {json_file}")
+    print(f"# python sswgsap.py -j {json_file}")
 
 
 def get_default_settings(d):
