@@ -31,7 +31,7 @@ example:
     # optional: generate config with --run_annovar key
 
 """
-__VERSION__ = "0.1.0"
+__VERSION__ = "0.1.1"
 
 import os
 import argparse
@@ -123,6 +123,10 @@ def parse_arguments_to_settings():
 
 
 def load_fastq_samples(settings):
+    if settings["debug"]:
+        print("# load_fastq_samples")
+        print("#", settings)
+
     def get_files_generator(dirs_list, extension=""):
         for path in dirs_list:
             for data_file in os.listdir(path):
@@ -155,6 +159,9 @@ def load_fastq_samples(settings):
 
 
 def run_pipeline(settings):
+    if settings["debug"]:
+        print("# run_pipeline")
+        print("#", settings)
     for sample in sorted(settings["samples_dict"]):
         sample_settings = settings
         sample_settings["sample"] = sample
@@ -168,6 +175,9 @@ def run_pipeline(settings):
 
 
 def save_project_settings_json(settings):
+    if settings["debug"]:
+        print("# load_fastq_samples")
+        print("#", settings)
     settings["project_script_dir"] = os.path.join(
         settings["project_root"],
         settings["script_dir_name"],
