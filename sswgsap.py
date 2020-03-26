@@ -99,8 +99,8 @@ def parse_arguments_to_settings():
         settings["ready"] = __READY__
     elif args.project_root and args.fastq_dirs_list:
         draft_settings_file = args.draft_settings_json if args.draft_settings_json else __DRAFT_SETTINGS_FILE__
-        draft_settings = json.load(open(draft_settings_file))
-        settings = {
+        settings = json.load(open(draft_settings_file))
+        project_settings = {
             "project_root": args.project_root,
             "fastq_dirs_list": args.fastq_dirs_list,
             "sample_delimiter": args.sample_delimiter,
@@ -113,7 +113,7 @@ def parse_arguments_to_settings():
             "debug": args.debug,
             "ready": __ALMOST_READY__,
         }
-        settings = draft_settings.update({k: v for k, v in settings.items() if v})
+        settings.update({k: v for k, v in project_settings.items() if v})
         settings["samples_list"] = sorted(load_fastq_samples(settings))
     else:
         settings = {
@@ -159,9 +159,6 @@ def load_fastq_samples(settings):
 
 
 def run_pipeline(settings):
-    if settings["debug"]:
-        print("# run_pipeline")
-        print("#", settings)
     for sample in sorted(settings["samples_dict"]):
         sample_settings = settings
         sample_settings["sample"] = sample
@@ -175,9 +172,6 @@ def run_pipeline(settings):
 
 
 def save_project_settings_json(settings):
-    if settings["debug"]:
-        print("# load_fastq_samples")
-        print("#", settings)
     settings["project_script_dir"] = os.path.join(
         settings["project_root"],
         settings["script_dir_name"],
@@ -208,6 +202,7 @@ def save_draft_settings_json():
             "script_dir_name": "scripts",
             "run_annovar": False,
             "add_tokens": False,
+            "debug": False,
             "samples_list": [],
             "read_group": {
                 "RGID": "__sample__",
@@ -352,7 +347,7 @@ def get_settings_for_SSAP(sample_dict):
 ###############################################################################
 def get_cmd_list_for_SSAP(sample_settings):
     if sample_settings["debug"]:
-        print("\n\nget_cmd_list_for_SSAP", sample_settings)
+        print("\n\n# get_cmd_list_for_SSAP", sample_settings)
     cmd_list = [
         get_mkdir_cmd(sample_settings),
         get_cmd_bwa_mem_sam(sample_settings),
