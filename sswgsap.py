@@ -1,11 +1,12 @@
 """
 example:
-    #  check run options
+    #  check run options and generate draft.json
     python sswgsap.py
 
 
     # initial config generation
     python sswgsap.py \\
+        --draft_json ./draft.json \\
         --project_root ~/projects/KAZ_WG/KAZ_WG_hg19 \\
         --fastq_dirs_list ~/icebox/fastq_gz/KAZ_WG/ \\
         --sample_delimiter . \\
@@ -30,7 +31,7 @@ example:
     # optional: generate config with --run_annovar key
 
 """
-__VERSION__ = "0.0.4"
+__VERSION__ = "0.1.0"
 
 import os
 import argparse
@@ -38,39 +39,55 @@ import json
 
 from collections import defaultdict
 
-
 __NOT_READY__ = "NOT_READY"
 __READY__ = "READY"
 __ALMOST_READY__ = "ALMOST_READY"
+__DRAFT_SETTINGS_FILE__ = "__draft_settings__.json"
 
 
 def main():
     settings = parse_arguments_to_settings()
-    if settings["ready"] == __ALMOST_READY__:
-        save_settings(settings)
-    elif settings["ready"] == __READY__:
+    if settings["ready"] == __READY__:
+        print("# running pipeline")
         run_pipeline(settings)
+    elif settings["ready"] == __ALMOST_READY__:
+        save_project_settings_json(settings)
     else:
         print(__doc__)
+        save_draft_settings_json()
+        print("# please provide --project_root and --fastq_dirs_list")
 
 
 def parse_arguments_to_settings():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-j", "--settings_json", default=None, required=False)
-    parser.add_argument("--project_root", default=None, required=False)
-    parser.add_argument("--fastq_dirs_list", default=[], required=False, nargs="+")
-    parser.add_argument("--sample_delimiter", default="_", required=False)
-    parser.add_argument("--fastq_extension", default=".fastq.gz", required=False)
-    parser.add_argument("--R1_fastq_extension", default=".R1.fastq.gz", required=False)
-    parser.add_argument("--R2_fastq_extension", default=".R2.fastq.gz", required=False)
-    parser.add_argument("--script_dir_name", default="scripts", required=False)
-    parser.add_argument("--run_annovar", action="store_true")
-    parser.add_argument("--add_tokens", action="store_true")
-    parser.add_argument("--debug", action="store_true")
+    parser.add_argument("-j", "--settings_json", default=None, required=False,
+                        help="generated and edited json with all required parameters")
+    parser.add_argument("-d", "--draft_settings_json", default=None, required=False,
+                        help="path to draft_json with local variables like tools and databases")
+    parser.add_argument("--project_root", default=None, required=False,
+                        help="folder to be created that will store pipeline output")
+    parser.add_argument("--fastq_dirs_list", default=None, required=False, nargs="+",
+                        help="")
+    parser.add_argument("--sample_delimiter", default=None, required=False,
+                        help="sample delimiter, usually _ (underscore) or . (dot)")
+    parser.add_argument("--fastq_extension", default=None, required=False,
+                        help="extension of input files, usually .fastq.gz or.fastq")
+    parser.add_argument("--R1_fastq_extension", default=None, required=False,
+                        help="extendion to distinguish R1 from R2")
+    parser.add_argument("--R2_fastq_extension", default=None, required=False,
+                        help="extendion to distinguish R2 from R1")
+    parser.add_argument("--script_dir_name", default=None, required=False,
+                        help="folder to store all runnable scripts, usually scripts")
+    parser.add_argument("--run_annovar", action="store_true",
+                        help="(beta) if present try to add annovar pipeline ")
+    parser.add_argument("--add_tokens", action="store_true",
+                        help="add tokens to distinguish steps completed, helps on reruns ")
+    parser.add_argument("--debug", action="store_true",
+                        help="print additional info messages")
     #
     args = parser.parse_args()
     if args.settings_json:
-        settings = json.load(open(args.settings_json))   # config exist, import it
+        settings = json.load(open(args.settings_json))  # config exist, import it
         __samples_dict__ = load_fastq_samples(settings)  # find all fastq files
         __samples_list__ = settings["samples_list"]  # get list of target samples from config
         settings["samples_dict"] = {  # filter target samples from all fastq
@@ -80,9 +97,10 @@ def parse_arguments_to_settings():
             if list_key == dict_key or list_key + "_m" == dict_key
         }
         settings["ready"] = __READY__
-    elif args.project_root:
+    elif args.project_root and args.fastq_dirs_list:
+        draft_settings_file = args.draft_settings_json if args.draft_settings_json else __DRAFT_SETTINGS_FILE__
+        draft_settings = json.load(open(draft_settings_file))
         settings = {
-            "settings_json": args.settings_json,
             "project_root": args.project_root,
             "fastq_dirs_list": args.fastq_dirs_list,
             "sample_delimiter": args.sample_delimiter,
@@ -93,16 +111,28 @@ def parse_arguments_to_settings():
             "run_annovar": args.run_annovar,
             "add_tokens": args.add_tokens,
             "debug": args.debug,
-            "ready":__ALMOST_READY__,
+            "ready": __ALMOST_READY__,
         }
+        settings = draft_settings.update({k: v for k, v in settings.items() if v})
+        settings["samples_list"] = sorted(load_fastq_samples(settings))
     else:
         settings = {
-            "ready":__NOT_READY__,
+            "ready": __NOT_READY__,
         }
     return settings
 
 
 def load_fastq_samples(settings):
+    def get_files_generator(dirs_list, extension=""):
+        for path in dirs_list:
+            for data_file in os.listdir(path):
+                if data_file:
+                    data_path = os.path.join(path, data_file)
+                    if os.path.isfile(data_path) and data_path.endswith(extension):
+                        yield data_path
+                    elif os.path.isdir(data_path):
+                        yield from get_files_generator([data_path], extension)
+
     fastq_dirs_list = settings["fastq_dirs_list"]
     sample_delimiter = settings["sample_delimiter"]
     fastq_extension = settings["fastq_extension"]
@@ -124,96 +154,6 @@ def load_fastq_samples(settings):
     return res
 
 
-def get_files_generator(dirs_list, extension=""):
-    for path in dirs_list:
-        for data_file in os.listdir(path):
-            if data_file:
-                data_path = os.path.join(path, data_file)
-                if os.path.isfile(data_path) and data_path.endswith(extension):
-                    yield data_path
-                elif os.path.isdir(data_path):
-                    yield from get_files_generator([data_path], extension)
-
-
-def save_settings(settings):
-    settings["project_script_dir"] = os.path.join(
-        settings["project_root"],
-        settings["script_dir_name"],
-    )
-    settings.update(get_default_settings(settings))
-    mkdir(settings["project_script_dir"])
-    json_file = os.path.join(
-        settings["project_script_dir"],
-        "default_settings.json",
-    )
-    with open(json_file, "w") as f:
-        default_settings_str = json.dumps(settings, indent=4, sort_keys=True)
-        f.write(default_settings_str)
-    # debug print
-    print(f"# ls  {settings['project_script_dir']}")
-    print(f"# cat {json_file}")
-    print(f"# vi  {json_file}")
-    print(f"# python sswgsap.py -j {json_file}")
-
-
-def get_default_settings(d):
-    default_settings_dict = {
-        "number_of_threads": "4",
-        "fastq_dirs_list": d["fastq_dirs_list"],
-        "sample_delimiter": d["sample_delimiter"],
-        "fastq_extension": d["fastq_extension"],
-        "R1_fastq_extension": d["R1_fastq_extension"],
-        "R2_fastq_extension": d["R2_fastq_extension"],
-        "samples_list": sorted(load_fastq_samples(d)) if  d["fastq_dirs_list"] else [],
-        "project_root": d["project_root"],
-        "read_group": {
-            "RGID": "__sample__",
-            "RGLB": "__sample__",
-            "RGPL": "ILLUMINA",
-            "RGPU": "SureSelectV4",
-            "RGSM": "__sample__",
-            "RGCN": "NLA"
-        },
-        "tools": {
-            "fastqc": "",
-            "bwa": "/home/Pipeline/bwa/bwa-0.7.12/bwa",
-            "samtools": "/home/Pipeline/samtools/samtools-1.2/samtools",
-            "bcftools": "/home/Pipeline/bcftools/bcftools-1.2/bcftools",
-            "java": "/home/Pipeline/java/jdk1.8.0_101/bin/java",
-            "picard": "/home/Pipeline/java/jdk1.8.0_101/bin/java -jar /home/Pipeline/picard/picard_1_130/picard.jar",
-            "gatk": "/home/Pipeline/java/jdk1.8.0_101/bin/java -jar /home/Pipeline/gatk/GATK_3_8_1/GenomeAnalysisTK.jar",
-            "vcf_concat": "/home/Pipeline/vcftools/vcftools_0.1.13/bin/vcf-concat",
-            "vcf_sort": "/home/Pipeline/vcftools/vcftools_0.1.13/bin/vcf-sort",
-            "vcf_merge:": "/home/Pipeline/vcftools/vcftools_0.1.13/bin/vcf-merge",
-            "bgzip": "/home/Pipeline/tabix/tabix-0.2.6/bgzip",
-            "tabix": "/home/Pipeline/tabix/tabix-0.2.6/tabix",
-            "#annovar": "",
-            "#snpedia": "",
-        },
-        "databases": {
-            "ref": "/home/PublicData/broadinstitute/2.8/hg19/ucsc.hg19.ref/ucsc.hg19.fasta",
-            "ref_ucsc_hg19": "/home/PublicData/broadinstitute/2.8/hg19/ucsc.hg19.ref/ucsc.hg19.fasta",
-            "ref_mtDNA": "/home/PublicData/h.sapiens_mtDNA/HS_mtDNA.fa",
-            "gold_indel": "/home/PublicData/broadinstitute/2.8/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.vcf",
-            "oneKG_indel": "/home/PublicData/broadinstitute/2.8/hg19/1000G_phase1.indels.hg19.sites.vcf",
-            "oneKG_snp": "/home/PublicData/broadinstitute/2.8/hg19/1000G_phase1.snps.high_confidence.hg19.sites.vcf",
-            "dbsnp": "/home/PublicData/broadinstitute/2.8/hg19/dbsnp_138.hg19.vcf",
-            "#dbsnp": "/home/PublicData/dbsnp/human_9606_b150_GRCh37p13/All_20170710.liftover.2.17.11.vcf",
-            "onmi_snp": "/home/PublicData/broadinstitute/2.8/hg19/1000G_omni2.5.hg19.sites.vcf",
-            "hapmap_snp": "/home/PublicData/broadinstitute/2.8/hg19/hapmap_3.3.hg19.sites.vcf",
-            "target_region": "/home/PublicData/Agilent_v4_71m_reduced.bed",
-            "#ensembl_ref_dir": "/home/PublicData/ensembl_GRCh37_75/",
-            "#ensembl_ref_fa": "/home/PublicData/ensembl_GRCh37_75/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa",
-            "#ensembl_ref_gtf": "/home/PublicData/ensembl_GRCh37_75/Homo_sapiens.GRCh37.75.gtf"
-        },
-    }
-    return default_settings_dict
-
-
-def mkdir(dir_name):
-    os.makedirs(dir_name, exist_ok=True)
-
-
 def run_pipeline(settings):
     for sample in sorted(settings["samples_dict"]):
         sample_settings = settings
@@ -223,8 +163,95 @@ def run_pipeline(settings):
         write_cmd_list_to_file(sample_settings, cmd_list)
     # debug print
     print(f"# ls {settings['project_script_dir']}")
-    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do echo $i; done" )
-    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do qsub $i; done" )
+    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do echo $i; done")
+    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do qsub $i; done")
+
+
+def save_project_settings_json(settings):
+    settings["project_script_dir"] = os.path.join(
+        settings["project_root"],
+        settings["script_dir_name"],
+    )
+    mkdir(settings["project_script_dir"])
+    project_settings_json_file = os.path.join(
+        settings["project_script_dir"],
+        "project_settings.json",
+    )
+    with open(project_settings_json_file, "w") as f:
+        project_settings_str = json.dumps(settings, indent=4, sort_keys=False)
+        f.write(project_settings_str)
+    # debug print
+    print(f"# ls   {settings['project_script_dir']}")
+    print(f"# more {project_settings_json_file}")
+    print(f"# nano {project_settings_json_file}")
+    print(f"# python wgs_pipeline.py -j {project_settings_json_file}")
+
+
+def save_draft_settings_json():
+    def get_draft_settings_json():
+        draft_settings_json = {
+            "number_of_threads": "4",
+            "sample_delimiter": "_",
+            "fastq_extension": ".fastq.gz",
+            "R1_fastq_extension": ".R1.fastq.gz",
+            "R2_fastq_extension": ".R1.fastq.gz",
+            "script_dir_name": "scripts",
+            "run_annovar": False,
+            "add_tokens": False,
+            "samples_list": [],
+            "read_group": {
+                "RGID": "__sample__",
+                "RGLB": "__sample__",
+                "RGPL": "ILLUMINA",
+                "RGPU": "SureSelectV4",
+                "RGSM": "__sample__",
+                "RGCN": "NLA"
+            },
+            "tools": {
+                "fastqc": "",
+                "bwa": "/home/Pipeline/bwa/bwa-0.7.12/bwa",
+                "samtools": "/home/Pipeline/samtools/samtools-1.2/samtools",
+                "bcftools": "/home/Pipeline/bcftools/bcftools-1.2/bcftools",
+                "java": "/home/Pipeline/java/jdk1.8.0_101/bin/java",
+                "picard": "/home/Pipeline/java/jdk1.8.0_101/bin/java -jar /home/Pipeline/picard/picard_1_130/picard.jar",
+                "gatk": "/home/Pipeline/java/jdk1.8.0_101/bin/java -jar /home/Pipeline/gatk/GATK_3_8_1/GenomeAnalysisTK.jar",
+                "vcf_concat": "/home/Pipeline/vcftools/vcftools_0.1.13/bin/vcf-concat",
+                "vcf_sort": "/home/Pipeline/vcftools/vcftools_0.1.13/bin/vcf-sort",
+                "vcf_merge:": "/home/Pipeline/vcftools/vcftools_0.1.13/bin/vcf-merge",
+                "bgzip": "/home/Pipeline/tabix/tabix-0.2.6/bgzip",
+                "tabix": "/home/Pipeline/tabix/tabix-0.2.6/tabix",
+                "annovar": "annovar",
+                "snpedia": "snpedia",
+            },
+            "databases": {
+                "ref": "/home/PublicData/broadinstitute/2.8/hg19/ucsc.hg19.ref/ucsc.hg19.fasta",
+                "ref_ucsc_hg19": "/home/PublicData/broadinstitute/2.8/hg19/ucsc.hg19.ref/ucsc.hg19.fasta",
+                "ref_mtDNA": "/home/PublicData/h.sapiens_mtDNA/HS_mtDNA.fa",
+                "gold_indel": "/home/PublicData/broadinstitute/2.8/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.vcf",
+                "oneKG_indel": "/home/PublicData/broadinstitute/2.8/hg19/1000G_phase1.indels.hg19.sites.vcf",
+                "oneKG_snp": "/home/PublicData/broadinstitute/2.8/hg19/1000G_phase1.snps.high_confidence.hg19.sites.vcf",
+                "dbsnp": "/home/PublicData/broadinstitute/2.8/hg19/dbsnp_138.hg19.vcf",
+                "#dbsnp": "/home/PublicData/dbsnp/human_9606_b150_GRCh37p13/All_20170710.liftover.2.17.11.vcf",
+                "onmi_snp": "/home/PublicData/broadinstitute/2.8/hg19/1000G_omni2.5.hg19.sites.vcf",
+                "hapmap_snp": "/home/PublicData/broadinstitute/2.8/hg19/hapmap_3.3.hg19.sites.vcf",
+                "target_region": "/home/PublicData/Agilent_v4_71m_reduced.bed",
+                "#ensembl_ref_dir": "/home/PublicData/ensembl_GRCh37_75/",
+                "#ensembl_ref_fa": "/home/PublicData/ensembl_GRCh37_75/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa",
+                "#ensembl_ref_gtf": "/home/PublicData/ensembl_GRCh37_75/Homo_sapiens.GRCh37.75.gtf"
+            },
+        }
+        return draft_settings_json
+
+    draft_settings_json = get_draft_settings_json()
+    with open(__DRAFT_SETTINGS_FILE__, "w") as f:
+        draft_json_str = json.dumps(draft_settings_json, indent=4, sort_keys=False)
+        f.write(draft_json_str)
+    print(f"# more {__DRAFT_SETTINGS_FILE__}")
+    print(f"# nano {__DRAFT_SETTINGS_FILE__}")
+
+
+def mkdir(dir_name):
+    os.makedirs(dir_name, exist_ok=True)
 
 
 def get_settings_for_SSAP(sample_dict):
@@ -234,7 +261,7 @@ def get_settings_for_SSAP(sample_dict):
     _dict = {
         "sample": sample,
         "sample_dir": sample_dir,
-        "project_script_dir" : sample_dict["project_script_dir"],
+        "project_script_dir": sample_dict["project_script_dir"],
         "number_of_threads": sample_dict["number_of_threads"],
 
         "bwa": sample_dict["tools"]["bwa"],
@@ -311,6 +338,7 @@ def get_settings_for_SSAP(sample_dict):
     }
     return _dict
 
+
 ###############################################################################
 def get_cmd_list_for_SSAP(sample_settings):
     if sample_settings["debug"]:
@@ -364,6 +392,7 @@ def reduce_spaces_and_newlines(s):
     s = " ".join([i for i in s.split(" ") if i])
     return s
 
+
 def get_cmd(d):
     d["token"] = "{sample_dir}/token.{sample}.{token_suffix}".format(**d)
     d["flags"] = " && ".join([" [ -f {:s} ] ".format(i) for i in d["files_list"]]) + " && [ ! -f {token} ] ".format(**d)
@@ -395,10 +424,11 @@ def clear_after_competion(d):
             {gatk_SV_SNP_raw_vcf}  {gatk_SV_INDEL_raw_vcf}
             {vcftools_concat_vcf}
             """.format(**d)
-            # {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} # for vcftools concatenate - sometimes library doesnt loaded well
+        # {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} # for vcftools concatenate - sometimes library doesnt loaded well
     else:
         cmd = ""
     return reduce_spaces_and_newlines(cmd)
+
 
 ###############################################################################
 def get_cmd_bwa_mem_sam(d):
@@ -407,6 +437,7 @@ def get_cmd_bwa_mem_sam(d):
     d["out_file"] = d["sam"]
     d["main_cmd"] = bash_bwa_mem_sam(d)
     return get_cmd(d)
+
 
 def bash_bwa_mem_sam(d):
     return """{bwa} mem -M -t {number_of_threads} {ref} {read1} {read2} > {sam}""".format(**d)
@@ -437,6 +468,7 @@ def get_cmd_samtools_sort_bam(d):
 def bash_samtools_sort_bam(d):
     return """{samtools} sort -l 9 -O bam -T {sorted_tmp} {bam} > {sorted_bam}""".format(**d)
 
+
 ###############################################################################
 def get_cmd_picard_ARRG_bam(d):
     d["files_list"] = [d["sorted_bam"]]
@@ -463,7 +495,7 @@ def bash_picard_ARRG_bam(d):
         VALIDATION_STRINGENCY=LENIENT
         MAX_RECORDS_IN_RAM=1000000
         """.format(**d)
-        # TMP_DIR={tmp_dir}
+    # TMP_DIR={tmp_dir}
 
 
 ###############################################################################
@@ -487,7 +519,7 @@ def bash_picard_MD_bam(d):
         VALIDATION_STRINGENCY=LENIENT
         MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000
         """.format(**d)
-        # TMP_DIR={tmp_dir}
+    # TMP_DIR={tmp_dir}
 
 
 ###############################################################################
@@ -509,7 +541,7 @@ def bash_gatk_RTC_intervals(d):
         -known {oneKG_indel}
         -o {RTC_intervals}
         """.format(**d)
-        # -L {target_region}
+    # -L {target_region}
 
 
 ###############################################################################
@@ -532,7 +564,7 @@ def bash_gatk_IR_bam(d):
         -known {oneKG_indel}
         -o {IR_bam}
         """.format(**d)
-        # -L {target_region}
+    # -L {target_region}
 
 
 ###############################################################################
@@ -644,7 +676,7 @@ def bash_gatk_HC_vcf(d):
 
 
 ###############################################################################
-def get_cmd_gatk_UG_vcf(d): # not ready tested
+def get_cmd_gatk_UG_vcf(d):  # not ready tested
     d["files_list"] = [d["BQSR_BR_bam"]]
     d["token_suffix"] = "gatk_BQSR_BR_bam_2_gatk_UG_vcf"
     d["out_file"] = d["gatk_UG_vcf"]
@@ -652,7 +684,7 @@ def get_cmd_gatk_UG_vcf(d): # not ready tested
     return get_cmd(d)
 
 
-def bash_gatk_UG_vcf(d): # not ready tested
+def bash_gatk_UG_vcf(d):  # not ready tested
     return """
         {gatk}
         -T UnifiedGenotyper
@@ -892,12 +924,13 @@ def get_cmd_annovar(d):
     d["main_cmd"] = bash_annovar(d)
     return get_cmd(d)
 
+
 def bash_annovar(d):
     input_file = d["vcftools_sorted_vcf"]
     output_file = d["annovar_output"]
-    table_annovar="perl /home/PublicData/annovar_src/annovar_20190101/table_annovar.pl"
-    convert2annovar="perl /home/PublicData/annovar_src/annovar_20190101/convert2annovar.pl"
-    annovar_db_folder="/home/PublicData/annovar_src/annovar_20190101/humandb"
+    table_annovar = "perl /home/PublicData/annovar_src/annovar_20190101/table_annovar.pl"
+    convert2annovar = "perl /home/PublicData/annovar_src/annovar_20190101/convert2annovar.pl"
+    annovar_db_folder = "/home/PublicData/annovar_src/annovar_20190101/humandb"
 
     db_gene = [
         "refGene",
@@ -949,7 +982,7 @@ def bash_annovar(d):
     ]
 
     protocol = ",".join(db_gene + db_filter)
-    operation = ",".join(["g"]*len(db_gene) + ["f"]*len(db_filter))
+    operation = ",".join(["g"] * len(db_gene) + ["f"] * len(db_filter))
 
     cmd = f"""
         {table_annovar}
@@ -976,8 +1009,10 @@ def get_cmd_annovar_add_header(d):
     d["main_cmd"] = bash_annovar_add_header(d)
     return get_cmd(d)
 
+
 def bash_annovar_add_header(d):
-    return """ python /home/PublicData/annovar_src/python/add_header.py -v {annovar_vcf} -t {annovar_txt} """.format(**d)
+    return """ python /home/PublicData/annovar_src/python/add_header.py -v {annovar_vcf} -t {annovar_txt} """.format(
+        **d)
 
 
 ###############################################################################
