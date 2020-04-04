@@ -69,6 +69,8 @@ ${gatk} -T BaseRecalibrator \
   -BQSR ${sample_prefix}.BR_table.txt \
   -o ${sample_prefix}.BQSR_BR_table.txt
 
+# warning this step may fail due to absence of R modules
+# you can safely skip this step
 ${gatk} -T AnalyzeCovariates \
   -R ${ref} \
   -before ${sample_prefix}.BR_table.txt \
@@ -157,9 +159,7 @@ ${gatk} -T SelectVariants \
 ${gatk} -T VariantFiltration \
   -R ${ref} \
   -V ${sample_prefix}.HC.VQSR.raw_snp.vcf \
-  --filterExpression "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < \
-  -12.5 || ReadPosRankSum < \
-  -8.0" \
+  --filterExpression "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0" \
   --filterName "SNP_FAIL" \
   -o ${sample_prefix}.HC.VQSR.fil_snp.vcf
 
