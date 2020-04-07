@@ -1,0 +1,14 @@
+name: wgs
+channels:
+  - defaults
+  - bioconda
+dependencies:
+  - git
+  - python
+  - fastqc
+  - bwa
+  - samtools
+  - picard
+  - gatk
+  - perl-vcftools-vcf
+  - tabix
