@@ -31,6 +31,7 @@ import argparse
 import glob
 import json
 import os
+import copy
 from collections import defaultdict
 
 __NOT_READY__ = "NOT_READY"
@@ -147,7 +148,7 @@ def load_fastq_samples(settings):
 
 def run_pipeline(settings):
     for sample in sorted(settings["samples_dict"]):
-        sample_settings = settings
+        sample_settings = copy.deepcopy(settings)
         sample_settings["sample"] = sample
         sample_settings = get_settings_for_SSAP(sample_settings)
         cmd_list = get_cmd_list_for_SSAP(sample_settings)

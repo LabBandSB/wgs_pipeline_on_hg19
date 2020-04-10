@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## 0.1.1 - 2020-04-11
+
+added copy and copy.deepcopy
+
 ## 0.1.0 - 2020-04-07
 
 added .gitignore

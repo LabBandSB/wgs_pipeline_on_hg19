@@ -32,12 +32,11 @@ example:
 """
 __VERSION__ = "0.0.4"
 
-import os
 import argparse
+import copy
 import json
-
+import os
 from collections import defaultdict
-
 
 __NOT_READY__ = "NOT_READY"
 __READY__ = "READY"
@@ -70,7 +69,7 @@ def parse_arguments_to_settings():
     #
     args = parser.parse_args()
     if args.settings_json:
-        settings = json.load(open(args.settings_json))   # config exist, import it
+        settings = json.load(open(args.settings_json))  # config exist, import it
         __samples_dict__ = load_fastq_samples(settings)  # find all fastq files
         __samples_list__ = settings["samples_list"]  # get list of target samples from config
         settings["samples_dict"] = {  # filter target samples from all fastq
@@ -93,11 +92,11 @@ def parse_arguments_to_settings():
             "run_annovar": args.run_annovar,
             "add_tokens": args.add_tokens,
             "debug": args.debug,
-            "ready":__ALMOST_READY__,
+            "ready": __ALMOST_READY__,
         }
     else:
         settings = {
-            "ready":__NOT_READY__,
+            "ready": __NOT_READY__,
         }
     return settings
 
@@ -164,7 +163,7 @@ def get_default_settings(d):
         "fastq_extension": d["fastq_extension"],
         "R1_fastq_extension": d["R1_fastq_extension"],
         "R2_fastq_extension": d["R2_fastq_extension"],
-        "samples_list": sorted(load_fastq_samples(d)) if  d["fastq_dirs_list"] else [],
+        "samples_list": sorted(load_fastq_samples(d)) if d["fastq_dirs_list"] else [],
         "project_root": d["project_root"],
         "read_group": {
             "RGID": "__sample__",
@@ -216,15 +215,15 @@ def mkdir(dir_name):
 
 def run_pipeline(settings):
     for sample in sorted(settings["samples_dict"]):
-        sample_settings = settings
+        sample_settings = copy.deepcopy(settings)
         sample_settings["sample"] = sample
         sample_settings = get_settings_for_SSAP(sample_settings)
         cmd_list = get_cmd_list_for_SSAP(sample_settings)
         write_cmd_list_to_file(sample_settings, cmd_list)
     # debug print
     print(f"# ls {settings['project_script_dir']}")
-    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do echo $i; done" )
-    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do qsub $i; done" )
+    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do echo $i; done")
+    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do qsub $i; done")
 
 
 def get_settings_for_SSAP(sample_dict):
@@ -234,7 +233,7 @@ def get_settings_for_SSAP(sample_dict):
     _dict = {
         "sample": sample,
         "sample_dir": sample_dir,
-        "project_script_dir" : sample_dict["project_script_dir"],
+        "project_script_dir": sample_dict["project_script_dir"],
         "number_of_threads": sample_dict["number_of_threads"],
 
         "bwa": sample_dict["tools"]["bwa"],
@@ -311,6 +310,7 @@ def get_settings_for_SSAP(sample_dict):
     }
     return _dict
 
+
 ###############################################################################
 def get_cmd_list_for_SSAP(sample_settings):
     if sample_settings["debug"]:
@@ -364,6 +364,7 @@ def reduce_spaces_and_newlines(s):
     s = " ".join([i for i in s.split(" ") if i])
     return s
 
+
 def get_cmd(d):
     d["token"] = "{sample_dir}/token.{sample}.{token_suffix}".format(**d)
     d["flags"] = " && ".join([" [ -f {:s} ] ".format(i) for i in d["files_list"]]) + " && [ ! -f {token} ] ".format(**d)
@@ -395,10 +396,11 @@ def clear_after_competion(d):
             {gatk_SV_SNP_raw_vcf}  {gatk_SV_INDEL_raw_vcf}
             {vcftools_concat_vcf}
             """.format(**d)
-            # {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} # for vcftools concatenate - sometimes library doesnt loaded well
+        # {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} # for vcftools concatenate - sometimes library doesnt loaded well
     else:
         cmd = ""
     return reduce_spaces_and_newlines(cmd)
+
 
 ###############################################################################
 def get_cmd_bwa_mem_sam(d):
@@ -407,6 +409,7 @@ def get_cmd_bwa_mem_sam(d):
     d["out_file"] = d["sam"]
     d["main_cmd"] = bash_bwa_mem_sam(d)
     return get_cmd(d)
+
 
 def bash_bwa_mem_sam(d):
     return """{bwa} mem -M -t {number_of_threads} {ref} {read1} {read2} > {sam}""".format(**d)
@@ -437,6 +440,7 @@ def get_cmd_samtools_sort_bam(d):
 def bash_samtools_sort_bam(d):
     return """{samtools} sort -l 9 -O bam -T {sorted_tmp} {bam} > {sorted_bam}""".format(**d)
 
+
 ###############################################################################
 def get_cmd_picard_ARRG_bam(d):
     d["files_list"] = [d["sorted_bam"]]
@@ -463,7 +467,7 @@ def bash_picard_ARRG_bam(d):
         VALIDATION_STRINGENCY=LENIENT
         MAX_RECORDS_IN_RAM=1000000
         """.format(**d)
-        # TMP_DIR={tmp_dir}
+    # TMP_DIR={tmp_dir}
 
 
 ###############################################################################
@@ -487,7 +491,7 @@ def bash_picard_MD_bam(d):
         VALIDATION_STRINGENCY=LENIENT
         MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000
         """.format(**d)
-        # TMP_DIR={tmp_dir}
+    # TMP_DIR={tmp_dir}
 
 
 ###############################################################################
@@ -509,7 +513,7 @@ def bash_gatk_RTC_intervals(d):
         -known {oneKG_indel}
         -o {RTC_intervals}
         """.format(**d)
-        # -L {target_region}
+    # -L {target_region}
 
 
 ###############################################################################
@@ -532,7 +536,7 @@ def bash_gatk_IR_bam(d):
         -known {oneKG_indel}
         -o {IR_bam}
         """.format(**d)
-        # -L {target_region}
+    # -L {target_region}
 
 
 ###############################################################################
@@ -644,7 +648,7 @@ def bash_gatk_HC_vcf(d):
 
 
 ###############################################################################
-def get_cmd_gatk_UG_vcf(d): # not ready tested
+def get_cmd_gatk_UG_vcf(d):  # not ready tested
     d["files_list"] = [d["BQSR_BR_bam"]]
     d["token_suffix"] = "gatk_BQSR_BR_bam_2_gatk_UG_vcf"
     d["out_file"] = d["gatk_UG_vcf"]
@@ -652,7 +656,7 @@ def get_cmd_gatk_UG_vcf(d): # not ready tested
     return get_cmd(d)
 
 
-def bash_gatk_UG_vcf(d): # not ready tested
+def bash_gatk_UG_vcf(d):  # not ready tested
     return """
         {gatk}
         -T UnifiedGenotyper
@@ -892,12 +896,13 @@ def get_cmd_annovar(d):
     d["main_cmd"] = bash_annovar(d)
     return get_cmd(d)
 
+
 def bash_annovar(d):
     input_file = d["vcftools_sorted_vcf"]
     output_file = d["annovar_output"]
-    table_annovar="perl /home/PublicData/annovar_src/annovar_20190101/table_annovar.pl"
-    convert2annovar="perl /home/PublicData/annovar_src/annovar_20190101/convert2annovar.pl"
-    annovar_db_folder="/home/PublicData/annovar_src/annovar_20190101/humandb"
+    table_annovar = "perl /home/PublicData/annovar_src/annovar_20190101/table_annovar.pl"
+    convert2annovar = "perl /home/PublicData/annovar_src/annovar_20190101/convert2annovar.pl"
+    annovar_db_folder = "/home/PublicData/annovar_src/annovar_20190101/humandb"
 
     db_gene = [
         "refGene",
@@ -949,7 +954,7 @@ def bash_annovar(d):
     ]
 
     protocol = ",".join(db_gene + db_filter)
-    operation = ",".join(["g"]*len(db_gene) + ["f"]*len(db_filter))
+    operation = ",".join(["g"] * len(db_gene) + ["f"] * len(db_filter))
 
     cmd = f"""
         {table_annovar}
@@ -976,8 +981,10 @@ def get_cmd_annovar_add_header(d):
     d["main_cmd"] = bash_annovar_add_header(d)
     return get_cmd(d)
 
+
 def bash_annovar_add_header(d):
-    return """ python /home/PublicData/annovar_src/python/add_header.py -v {annovar_vcf} -t {annovar_txt} """.format(**d)
+    return """ python /home/PublicData/annovar_src/python/add_header.py -v {annovar_vcf} -t {annovar_txt} """.format(
+        **d)
 
 
 ###############################################################################
