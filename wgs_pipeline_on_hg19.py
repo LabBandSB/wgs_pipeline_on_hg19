@@ -337,7 +337,7 @@ def get_cmd_list_for_SSAP(sample_settings):
         get_cmd_vcf_concat(sample_settings),
         get_cmd_vcf_sort(sample_settings),
 
-        clear_after_competion(sample_settings)
+        #clear_after_competion(sample_settings)
     ]
     return cmd_list
 
@@ -390,7 +390,7 @@ def clear_after_competion(d):
             {IR_bam}
             {gatk_AR_SNP_vcf} {gatk_AR_INDEL_vcf}
             {gatk_SV_SNP_raw_vcf}  {gatk_SV_INDEL_raw_vcf}
-            {vcftools_concat_vcf}
+            {vcf_vcftools_concat}
             """.format(**d)
         # {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} # for vcftools concatenate - sometimes library doesnt loaded well
     else:
