@@ -1,6 +1,24 @@
-"""
+import argparse
+import glob
+import json
+import os
+import copy
+from collections import defaultdict
+
+__NOT_READY__ = "NOT_READY"
+__READY__ = "READY"
+__ALMOST_READY__ = "ALMOST_READY"
+__DRAFT_SETTINGS_FILE__ = "__draft_settings__.json"
+__SCRIPT_NAME__ = "wgs_pipeline_on_hg19.py"
+__version__ = "0.1.2 - 2020.05.23"
+
+
+__doc__ = f"""
+    WHOLE GENOME SEQUENCE alignment/mapping pipeline on reference genome hg19
+
 example:
-    #  check run options and generate draft.json
+    # step 1
+    # check run options and generate draft.json (with path to databases)
     python wgs_pipeline_on_hg19.py
 
     # it is recommended to rename draft.json to save it from overwriting
@@ -27,18 +45,6 @@ example:
     cd /path/to/save/wgs/project/scripts/; for i in $( ls *.ss.sh ); do qsub $i; done
 """
 
-import argparse
-import glob
-import json
-import os
-import copy
-from collections import defaultdict
-
-__NOT_READY__ = "NOT_READY"
-__READY__ = "READY"
-__ALMOST_READY__ = "ALMOST_READY"
-__DRAFT_SETTINGS_FILE__ = "__draft_settings__.json"
-
 
 def main():
     settings = parse_arguments_to_settings()
@@ -48,7 +54,8 @@ def main():
         save_project_settings_json(settings)
     else:
         print(__doc__)
-        save_draft_settings_json()
+        if not os.path.exists(__DRAFT_SETTINGS_FILE__):
+            save_draft_settings_json()
         print("# please provide --project_root and --fastq_dirs_list")
 
 
@@ -78,6 +85,8 @@ def parse_arguments_to_settings():
                         help="add tokens to distinguish steps completed, helps on reruns ")
     parser.add_argument("--debug", action="store_true",
                         help="print additional info messages")
+    parser.add_argument("--clean_after", action="store_true",
+                        help="add cleaning cmd to pipeline")
     #
     args = parser.parse_args()
     if args.settings_json:
@@ -107,6 +116,7 @@ def parse_arguments_to_settings():
             "add_tokens": args.add_tokens,
             "debug": args.debug,
             "ready": __ALMOST_READY__,
+            "clean_after": args.clean_after,
         }
         settings.update({k: v for k, v in project_settings.items() if v})
         settings["samples_list"] = sorted(load_fastq_samples(settings))
@@ -336,9 +346,9 @@ def get_cmd_list_for_SSAP(sample_settings):
 
         get_cmd_vcf_concat(sample_settings),
         get_cmd_vcf_sort(sample_settings),
-
-        #clear_after_competion(sample_settings)
     ]
+    if "clean_after" in sample_settings and sample_settings["clean_after"]:
+        cmd_list += [clear_after_competion(sample_settings), ]
     return cmd_list
 
 
