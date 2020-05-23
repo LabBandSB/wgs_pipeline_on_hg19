@@ -19,11 +19,11 @@ __doc__ = f"""
 example:
     # step 1
     # check run options and generate draft.json (with path to databases)
-    python wgs_pipeline_on_hg19.py
+    python {__SCRIPT_NAME__}
 
     # it is recommended to rename draft.json to save it from overwriting
     # initial config generation, full version
-    python wgs_pipeline_on_hg19.py \\
+    python {__SCRIPT_NAME__} \\
         --draft_json ./draft.json \\
         --project_root /path/to/save/wgs/project/ \\
         --script_dir_name scripts \\
@@ -33,12 +33,13 @@ example:
         --R1_fastq_extension .R1.fastq.gz \\
         --R2_fastq_extension .R2.fastq.gz \\
         --add_tokens \\
-        --debug
+        --debug \\
+        --clear_after
 
     # precise config tuning
 
     # scripts generation
-    python wgs_pipeline_on_hg19.py -j /path/to/save/wgs/project/scripts/default_settings.json
+    python {__SCRIPT_NAME__} -j /path/to/save/wgs/project/scripts/default_settings.json
 
     # submit scripts to workload manager
 
@@ -188,7 +189,7 @@ def save_project_settings_json(settings):
     print(f"# cd   {settings['project_script_dir']}")
     print(f"# more {project_settings_json_file}")
     print(f"# nano {project_settings_json_file}")
-    print(f"# python __script_name__.py -j {project_settings_json_file}")
+    print(f"# python {__SCRIPT_NAME__} -j {project_settings_json_file}")
 
 
 def save_draft_settings_json():
