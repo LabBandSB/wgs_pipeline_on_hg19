@@ -9,7 +9,7 @@ __NOT_READY__ = "NOT_READY"
 __READY__ = "READY"
 __ALMOST_READY__ = "ALMOST_READY"
 __DRAFT_SETTINGS_FILE__ = "__draft_settings__.json"
-__SCRIPT_NAME__ = "wgs_pipeline_on_hg19.py"
+__SCRIPT_NAME__ = "wgs_pipeline_on_hg19_old_samtools.py"
 __version__ = "0.1.2 - 2020.05.23"
 
 
@@ -445,7 +445,7 @@ def get_cmd_samtools_sort_bam(d):
 
 
 def bash_samtools_sort_bam(d):
-    return """{samtools} sort -l 9 -O bam {bam_samtools_view} > {bam_samtools_sort}""".format(**d)
+    return """{samtools} sort -l 9 -O bam -T {bam_samtools_view}.temp {bam_samtools_view} > {bam_samtools_sort}""".format(**d)
 
 
 ###############################################################################
