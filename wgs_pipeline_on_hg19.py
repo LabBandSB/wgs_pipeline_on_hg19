@@ -12,7 +12,6 @@ __DRAFT_SETTINGS_FILE__ = "__draft_settings__.json"
 __SCRIPT_NAME__ = "wgs_pipeline_on_hg19.py"
 __version__ = "0.1.2 - 2020.05.23"
 
-
 __doc__ = f"""
     WHOLE GENOME SEQUENCE alignment/mapping pipeline on reference genome hg19
 
