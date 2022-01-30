@@ -909,6 +909,7 @@ def write_cmd_list_to_file(sample_settings, cmd_list):
         sample_settings["project_script_dir"],
         sample_settings["sample"] + ".ss.sh",
     )
+    print ('>'*40, script_file)
     with open(script_file, "w") as f:
         f.write("#!/bin/bash\n\n")
         for cmd in cmd_list:
