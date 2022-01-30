@@ -36,6 +36,8 @@ example:
         --fastq_extension .fastq.gz \\
         --R1_fastq_extension .R1.fastq.gz \\
         --R2_fastq_extension .R2.fastq.gz \\
+        --R1_fastq_delimiter _ \\
+        --R2_fastq_delimiter _ \\
         --no_tokens \\
         --debug \\
         --clear_after
@@ -383,7 +385,7 @@ def get_mkdir_cmd(d):
 ###############################################################################
 def get_lock_on_sample(d):
     ''' lock file to lock rerunning same sample from different workers'''
-    d['tocken_suffix'] = '__first_run_lock__'
+    d['token_suffix'] = '__first_run_lock__'
     d["token"] = "{sample_dir}/token.{sample}.{token_suffix}".format(**d)
     cmd = """[ ! -f {token} ] && touch {token} || exit 1""".format(**d)
 
