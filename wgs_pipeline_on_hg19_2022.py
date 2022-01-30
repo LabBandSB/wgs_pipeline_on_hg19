@@ -388,6 +388,7 @@ def get_lock_on_sample(d):
     d['token_suffix'] = '__first_run_lock__'
     d["token"] = "{sample_dir}/token.{sample}.{token_suffix}".format(**d)
     cmd = """[ ! -f {token} ] && touch {token} || exit 1""".format(**d)
+    return cmd
 
 ###############################################################################
 def reduce_spaces_and_newlines(func):
@@ -909,7 +910,6 @@ def write_cmd_list_to_file(sample_settings, cmd_list):
         sample_settings["project_script_dir"],
         sample_settings["sample"] + ".ss.sh",
     )
-    print ('>'*40, script_file)
     with open(script_file, "w") as f:
         f.write("#!/bin/bash\n\n")
         for cmd in cmd_list:
