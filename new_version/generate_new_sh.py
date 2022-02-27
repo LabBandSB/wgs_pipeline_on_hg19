@@ -118,10 +118,12 @@ def main():
     samples_dict = load_fastq_samples(settings)
     samples_list = samples_dict_to_list(samples_dict)
 
-    script_dir = d['script_dir']
+    script_dir = settings['script_dir']
     os.makedirs(script_dir, exist_ok=True)
 
     for sample_dict in samples_list:
+        sample_dict['script_dir'] = settings['script_dir']
+        sample_dict['project_dir'] = settings['project_dir']
         prepare_sh_for_sample(sample_dict)
 
 
