@@ -1,3 +1,4 @@
+import argparse
 import json
 import os
 from collections import defaultdict
@@ -33,9 +34,6 @@ d = {
     "ref_mtDNA": "/home/PublicData/h.sapiens_mtDNA/HS_mtDNA.fa",
     "ref_ucsc_hg19": "/home/PublicData/broadinstitute/2.8/hg19/ucsc.hg19.ref/ucsc.hg19.fasta",
     "target_region": "/home/PublicData/Agilent_v4_71m_reduced.bed",
-
-    "project_dir": "/mnt/lustre/home/adminrig/projects/novaseq_wg/alignment_hg19/220124",
-    "script_dir": "/mnt/lustre/home/adminrig/projects/novaseq_wg/alignment_hg19/220124/scripts",
 }
 
 
@@ -104,9 +102,19 @@ def prepare_sh_for_sample(sample_dict):
             f.write(line)
 
 
+def parse_arguments_to_settings():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-j", "--settings_json", default=None, required=True)
+    args = parser.parse_args()
+    if args.settings_json:
+        settings = json.load(open(args.settings_json))
+    else:
+        settings = [{}]
+    return settings
+
+
 def main():
-    settings_file = 'settings.json'
-    settings = json.load(open(settings_file))
+    settings = parse_arguments_to_settings()
     samples_dict = load_fastq_samples(settings)
     samples_list = samples_dict_to_list(samples_dict)
 
@@ -115,6 +123,7 @@ def main():
 
     for sample_dict in samples_list:
         prepare_sh_for_sample(sample_dict)
+
 
 if __name__ == '__main__':
     main()
