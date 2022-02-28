@@ -109,6 +109,7 @@ dt2=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${dt2} > ${token} \
 || echo "TOKEN SKIPPED ${token}"
 
+
 # #######
 token="${alignment_dir}/token.${sample}.bam_2_txt_gatk_BR"
 input_file="${alignment_dir}/${sample}.picard_MD.bam"
@@ -120,9 +121,9 @@ echo ${dt1} ${token} && \
 ${gatk} -T BaseRecalibrator \
   -R ${ref} \
   -I ${input_file} \
-  -knownSites ${dbsnp138} \
-  -knownSites ${Mills_indels} \
-  -knownSites ${thousand_genomes_indels} \
+  -knownSites ${dbsnp} \
+  -knownSites ${gold_indel} \
+  -knownSites ${oneKG_indel} \
   -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
@@ -142,9 +143,9 @@ echo ${dt1} ${token} && \
 ${gatk} -T BaseRecalibrator \
   -R ${ref} \
   -I ${input_file} \
-  -knownSites ${dbsnp138} \
-  -knownSites ${Mills_indels} \
-  -knownSites ${thousand_genomes_indels} \
+  -knownSites ${dbsnp} \
+  -knownSites ${gold_indel} \
+  -knownSites ${oneKG_indel} \
   -BQSR ${input_file_2} \
   -o {output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
@@ -207,7 +208,7 @@ echo ${dt1} ${token} && \
 ${gatk} -T HaplotypeCaller \
   -R ${ref} \
   -I ${input_file} \
-  -D ${dbsnp138} \
+  -D ${dbsnp} \
   --genotyping_mode DISCOVERY \
   -stand_call_conf 30 \
   -o ${output_file} \
@@ -232,10 +233,10 @@ echo ${dt1} ${token} && \
 ${gatk} -T VariantRecalibrator \
   -R ${ref} \
   -input ${input_file} \
-  -resource:hapmap,known=false,training=true,truth=true,prior=15.0 ${hapmap_snps} \
-  -resource:omni,known=false,training=true,truth=true,prior=12.0 ${omni_snps} \
-  -resource:1000G,known=false,training=true,truth=false,prior=10.0 ${thousand_genomes_snps} \
-  -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 ${dbsnp138} \
+  -resource:hapmap,known=false,training=true,truth=true,prior=15.0 ${hapmap_snp} \
+  -resource:omni,known=false,training=true,truth=true,prior=12.0 ${onmi_snp} \
+  -resource:1000G,known=false,training=true,truth=false,prior=10.0 ${oneKG_snp} \
+  -resource:dbsnp,known=true,training=false,truth=false,prior=2.0 ${dbsnp} \
   -an DP \
   -an QD \
   -an FS \
@@ -297,7 +298,7 @@ echo ${dt1} ${token} && \
 ${gatk} -T VariantRecalibrator \
   -R ${ref} \
   -input ${input_file} \
-  -resource:mills,known=true,training=true,truth=true,prior=12.0 ${Mills_indels} \
+  -resource:mills,known=true,training=true,truth=true,prior=12.0 ${gold_indel} \
   -an DP \
   -an FS \
   -an MQRankSum \
