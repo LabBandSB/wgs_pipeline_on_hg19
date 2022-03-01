@@ -1,4 +1,4 @@
-
+#this template is with step tokens 
 
 mkdir -p ${alignment_dir}
 
@@ -7,6 +7,11 @@ mkdir -p ${alignment_dir}
 [ ! -f ${alignment_dir}/token.${sample}.__first_run_lock__ ] && \
 touch ${alignment_dir}/token.${sample}.__first_run_lock__ \
 || exit 1
+
+
+# remove final lock to indicate that the pipeline is not ended 
+rm -f ${alignment_dir}/token.${sample}.__final_lock__ 
+dt1dt1=`date +%y%m%d_%H%M%S` 
 
 
 # bwa alignment
@@ -478,4 +483,11 @@ echo ${dt1} ${dt2} > ${token} \
 || echo "TOKEN SKIPPED ${token}"
 
 # THE END 
+dt2dt2=`date +%y%m%d_%H%M%S` && \
+echo ${dt1dt1} ${dt2dt2} > ${alignment_dir}/token.${sample}.__final_lock__ 
+
+echo "DONE!"
+echo "DONE!"
+echo "DONE!"
+echo "DONE!"
 echo "DONE!"
