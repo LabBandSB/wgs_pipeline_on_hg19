@@ -1,5 +1,6 @@
 #this template is with step tokens 
 
+
 mkdir -p ${alignment_dir}
 
 
@@ -20,6 +21,7 @@ output_file="${alignment_dir}/${sample}.bwa_mem.sam"
 [ ! -f ${token} ] && \
 [ -f ${read1} ] && \
 [ -f ${read2} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${bwa} mem -M -t 4 ${ref} ${read1} ${read2} > ${output_file} && \
@@ -30,13 +32,13 @@ echo ${dt1} ${dt2} > ${token} \
 || echo "TOKEN SKIPPED ${token}"
 
 
-
 # samtools convert sam to bam
 token="${alignment_dir}/token.${sample}.sam_2_bam_samtools_view"
 input_file="${alignment_dir}/${sample}.bwa_mem.sam"
 output_file="${alignment_dir}/${sample}.samtools_view.bam"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${samtools} view -bT ${ref} ${input_file} > ${output_file} && \
@@ -47,13 +49,13 @@ echo ${dt1} ${dt2} > ${token} \
 || echo "TOKEN SKIPPED ${token}"
 
 
-
 # samtools sort bam to bam
 token="${alignment_dir}/token.${sample}.bam_2_bam_samtools_sort"
 input_file="${alignment_dir}/${sample}.samtools_view.bam"
 output_file="${alignment_dir}/${sample}.samtools_sort.bam"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${samtools} sort -l 9 -O bam -T ${alignment_dir}/${sample}.sorted.tmp ${input_file} > ${output_file} && \
@@ -70,6 +72,7 @@ input_file="${alignment_dir}/${sample}.samtools_sort.bam"
 output_file="${alignment_dir}/${sample}.picard_ARRG.bam"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${picard} AddOrReplaceReadGroups \
@@ -98,6 +101,7 @@ input_file="${alignment_dir}/${sample}.picard_ARRG.bam"
 output_file="${alignment_dir}/${sample}.picard_MD.bam"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${picard} MarkDuplicates \
@@ -121,6 +125,7 @@ input_file="${alignment_dir}/${sample}.picard_MD.bam"
 output_file="${alignment_dir}/${sample}.BR_table.txt"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T BaseRecalibrator \
@@ -143,6 +148,8 @@ input_file_2="${alignment_dir}/${sample}.BR_table.txt"
 output_file="${alignment_dir}/${sample}.BQSR_BR_table.txt"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+[ -f ${input_file_2} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T BaseRecalibrator \
@@ -167,6 +174,8 @@ input_file_2="${alignment_dir}/${sample}.BQSR_BR_table.txt"
 output_file="${alignment_dir}/${sample}.gatk_AC_plot.pdf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+[ -f ${input_file_2} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T AnalyzeCovariates \
@@ -188,6 +197,8 @@ input_file_2="${alignment_dir}/${sample}.BQSR_BR_table.txt"
 output_file="${alignment_dir}/${sample}.gatk_PR_BQSR_BR_table.bam"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+[ -f ${input_file_2} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T PrintReads \
@@ -208,6 +219,7 @@ input_file="${alignment_dir}/${sample}.gatk_PR_BQSR_BR_table.bam"
 output_file="${alignment_dir}/${sample}.gatk_HC.vcf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T HaplotypeCaller \
@@ -233,6 +245,9 @@ output_file_2="${alignment_dir}/${sample}.gatk_VR_SNP.tranches"
 output_file_3="${alignment_dir}/${sample}.VR_SNP.R"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
+rm -f ${output_file_2} && \
+rm -f ${output_file_3} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T VariantRecalibrator \
@@ -273,6 +288,7 @@ output_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.vcf"
 [ -f ${input_file} ] && \
 [ -f ${input_file_2} ] && \
 [ -f ${input_file_3} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T ApplyRecalibration \
@@ -298,6 +314,9 @@ output_file_2="${alignment_dir}/${sample}.gatk_VR_INDEL.tranches"
 output_file_3="${alignment_dir}/${sample}.VR_INDEL.R"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
+rm -f ${output_file_2} && \
+rm -f ${output_file_3} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T VariantRecalibrator \
@@ -334,6 +353,7 @@ output_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.gatk_AR_INDEL_VQSR.vcf"
 [ -f ${input_file} ] && \
 [ -f ${input_file_2} ] && \
 [ -f ${input_file_3} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T ApplyRecalibration \
@@ -357,6 +377,7 @@ input_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.gatk_AR_INDEL_VQSR.vcf"
 output_file="${alignment_dir}/${sample}.gatk_SV_SNP.vcf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T SelectVariants \
@@ -377,6 +398,7 @@ input_file="${alignment_dir}/${sample}.gatk_SV_SNP.vcf"
 output_file="${alignment_dir}/${sample}.gatk_VF_SNP.vcf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T VariantFiltration \
@@ -398,6 +420,7 @@ input_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.gatk_AR_INDEL_VQSR.vcf"
 output_file="${alignment_dir}/${sample}.gatk_SV_INDEL.vcf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T SelectVariants \
@@ -418,6 +441,7 @@ input_file="${alignment_dir}/${sample}.gatk_SV_INDEL.vcf"
 output_file="${alignment_dir}/${sample}.gatk_VF_INDEL.vcf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -T VariantFiltration \
@@ -441,6 +465,7 @@ output_file="${alignment_dir}/${sample}.vcf_concat.vcf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
 [ -f ${input_file_2} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 vcf-concat ${input_file} ${input_file_2} > ${output_file} && \
@@ -457,6 +482,7 @@ input_file="${alignment_dir}/${sample}.vcf_concat.vcf"
 output_file="${alignment_dir}/${sample}.vcf_sort.vcf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 cat ${input_file} | vcf-sort > ${output_file} && \
@@ -473,6 +499,7 @@ input_file="${alignment_dir}/${sample}.vcf_sort.vcf"
 output_file="${alignment_dir}/${sample}.FINAL.vcf"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
+rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 cp ${input_file} ${output_file} && \
