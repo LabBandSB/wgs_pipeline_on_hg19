@@ -159,7 +159,7 @@ ${gatk} -Xmx${XMXVALUE} -T BaseRecalibrator \
   -knownSites ${gold_indel} \
   -knownSites ${oneKG_indel} \
   -BQSR ${input_file_2} \
-  -o {output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
