@@ -2,7 +2,7 @@
 
 
 mkdir -p ${alignment_dir}
-
+XMXVALUE="64G"
 
 # lock sample to prevent runnig from 2 servers 
 [ ! -f ${alignment_dir}/token.${sample}.__first_run_lock__ ] && \
@@ -128,7 +128,7 @@ output_file="${alignment_dir}/${sample}.BR_table.txt"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T BaseRecalibrator \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T BaseRecalibrator \
   -R ${ref} \
   -I ${input_file} \
   -knownSites ${dbsnp} \
@@ -152,7 +152,7 @@ output_file="${alignment_dir}/${sample}.BQSR_BR_table.txt"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T BaseRecalibrator \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T BaseRecalibrator \
   -R ${ref} \
   -I ${input_file} \
   -knownSites ${dbsnp} \
@@ -178,7 +178,7 @@ output_file="${alignment_dir}/${sample}.gatk_AC_plot.pdf"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T AnalyzeCovariates \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T AnalyzeCovariates \
   -R ${ref} \
   -before ${input_file} \
   -after ${input_file_2} \
@@ -201,7 +201,7 @@ output_file="${alignment_dir}/${sample}.gatk_PR_BQSR_BR_table.bam"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T PrintReads \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T PrintReads \
   -R ${ref} \
   -I ${input_file} \
   -BQSR ${input_file_2} \
@@ -222,7 +222,7 @@ output_file="${alignment_dir}/${sample}.gatk_HC.vcf"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T HaplotypeCaller \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T HaplotypeCaller \
   -R ${ref} \
   -I ${input_file} \
   -D ${dbsnp} \
@@ -250,7 +250,7 @@ rm -f ${output_file_2} && \
 rm -f ${output_file_3} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T VariantRecalibrator \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T VariantRecalibrator \
   -R ${ref} \
   -input ${input_file} \
   -resource:hapmap,known=false,training=true,truth=true,prior=15.0 ${hapmap_snp} \
@@ -291,7 +291,7 @@ output_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.vcf"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T ApplyRecalibration \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T ApplyRecalibration \
   -R ${ref} \
   -input ${sample_prefix}.HC.vcf \
   -mode SNP \
@@ -319,7 +319,7 @@ rm -f ${output_file_2} && \
 rm -f ${output_file_3} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T VariantRecalibrator \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T VariantRecalibrator \
   -R ${ref} \
   -input ${input_file} \
   -resource:mills,known=true,training=true,truth=true,prior=12.0 ${gold_indel} \
@@ -356,7 +356,7 @@ output_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.gatk_AR_INDEL_VQSR.vcf"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T ApplyRecalibration \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T ApplyRecalibration \
   -R ${ref} \
   -input ${input_file} \
   -mode INDEL \
@@ -380,7 +380,7 @@ output_file="${alignment_dir}/${sample}.gatk_SV_SNP.vcf"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T SelectVariants \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T SelectVariants \
   -R ${ref} \
   -V ${input_file} \
   -selectType SNP \
@@ -401,7 +401,7 @@ output_file="${alignment_dir}/${sample}.gatk_VF_SNP.vcf"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T VariantFiltration \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T VariantFiltration \
   -R ${ref} \
   -V ${input_file} \
   --filterExpression "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0" \
@@ -423,7 +423,7 @@ output_file="${alignment_dir}/${sample}.gatk_SV_INDEL.vcf"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T SelectVariants \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T SelectVariants \
   -R ${ref} \
   -V ${input_file} \
   -selectType INDEL \
@@ -444,7 +444,7 @@ output_file="${alignment_dir}/${sample}.gatk_VF_INDEL.vcf"
 rm -f ${output_file} && \
 dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
-${gatk} -T VariantFiltration \
+${gatk} --java-options "-Xmx${XMXVALUE}" -T VariantFiltration \
   -R ${ref} \
   -V ${input_file} \
   --filterExpression "QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0" \
