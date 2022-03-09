@@ -107,7 +107,7 @@ echo ${dt1} ${token} && \
 ${picard} MarkDuplicates \
   INPUT=${input_file} \
   OUTPUT=${output_file} \
-  METRICS_FILE=${sample_prefix}.poicard_MD_metrics.txt \
+  METRICS_FILE=${alignment_dir}/${sample}.picard_MD_metrics.txt \
   ASSUME_SORTED=true \
   CREATE_INDEX=true \
   VALIDATION_STRINGENCY=LENIENT \
