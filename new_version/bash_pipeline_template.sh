@@ -134,7 +134,7 @@ ${gatk} -Xmx${XMXVALUE} -T BaseRecalibrator \
   -knownSites ${dbsnp} \
   -knownSites ${gold_indel} \
   -knownSites ${oneKG_indel} \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
@@ -159,7 +159,7 @@ ${gatk} -Xmx${XMXVALUE} -T BaseRecalibrator \
   -knownSites ${gold_indel} \
   -knownSites ${oneKG_indel} \
   -BQSR ${input_file_2} \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
@@ -205,7 +205,7 @@ ${gatk} -Xmx${XMXVALUE} -T PrintReads \
   -R ${ref} \
   --input ${input_file} \
   -BQSR ${input_file_2} \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
@@ -228,7 +228,7 @@ ${gatk} -Xmx${XMXVALUE} -T HaplotypeCaller \
   --dbsnp ${dbsnp} \
   --genotyping_mode DISCOVERY \
   -stand_call_conf 30 \
-  --output ${output_file} \
+  -o ${output_file} \
   -nct 4 && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
@@ -298,7 +298,7 @@ ${gatk} -Xmx${XMXVALUE} -T ApplyRecalibration \
   --ts_filter_level 99.0 \
   -recalFile ${input_file_2} \
   -tranchesFile ${input_file_3} \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
@@ -363,7 +363,7 @@ ${gatk} -Xmx${XMXVALUE} -T ApplyRecalibration \
   --ts_filter_level 99.0 \
   -recalFile ${input_file_2} \
   -tranchesFile ${input_file_3} \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
@@ -384,7 +384,7 @@ ${gatk} -Xmx${XMXVALUE} -T SelectVariants \
   -R ${ref} \
   -V ${input_file} \
   -selectType SNP \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
@@ -406,7 +406,7 @@ ${gatk} -Xmx${XMXVALUE} -T VariantFiltration \
   -V ${input_file} \
   --filterExpression "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0" \
   --filterName "SNP_FAIL" \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
@@ -427,7 +427,7 @@ ${gatk} -Xmx${XMXVALUE} -T SelectVariants \
   -R ${ref} \
   -V ${input_file} \
   -selectType INDEL \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
@@ -449,7 +449,7 @@ ${gatk} -Xmx${XMXVALUE} -T VariantFiltration \
   -V ${input_file} \
   --filterExpression "QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0" \
   --filterName "INDEL_FAIL" \
-  --output ${output_file} && \
+  -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
 md5sum ${output_file} > ${output_file}.${dt1}.md5 && \
 dt2=`date +%y%m%d_%H%M%S` && \
