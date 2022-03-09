@@ -130,7 +130,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T BaseRecalibrator \
   -R ${ref} \
-  --input ${input_file} \
+  -I ${input_file} \
   -knownSites ${dbsnp} \
   -knownSites ${gold_indel} \
   -knownSites ${oneKG_indel} \
@@ -154,7 +154,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T BaseRecalibrator \
   -R ${ref} \
-  --input ${input_file} \
+  -I ${input_file} \
   -knownSites ${dbsnp} \
   -knownSites ${gold_indel} \
   -knownSites ${oneKG_indel} \
@@ -203,7 +203,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T PrintReads \
   -R ${ref} \
-  --input ${input_file} \
+  -I ${input_file} \
   -BQSR ${input_file_2} \
   -o ${output_file} && \
 du ${output_file} > ${output_file}.${dt1}.du && \
@@ -224,7 +224,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T HaplotypeCaller \
   -R ${ref} \
-  --input ${input_file} \
+  -I ${input_file} \
   --dbsnp ${dbsnp} \
   --genotyping_mode DISCOVERY \
   -stand_call_conf 30 \
@@ -252,7 +252,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T VariantRecalibrator \
   -R ${ref} \
-  --input ${input_file} \
+  -I ${input_file} \
   -resource:hapmap,known=false,training=true,truth=true,prior=15.0 ${hapmap_snp} \
   -resource:omni,known=false,training=true,truth=true,prior=12.0 ${onmi_snp} \
   -resource:1000G,known=false,training=true,truth=false,prior=10.0 ${oneKG_snp} \
@@ -293,7 +293,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T ApplyRecalibration \
   -R ${ref} \
-  --input ${input_file} \
+  -I ${input_file} \
   -mode SNP \
   --ts_filter_level 99.0 \
   -recalFile ${input_file_2} \
@@ -321,7 +321,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T VariantRecalibrator \
   -R ${ref} \
-  --input ${input_file} \
+  -I ${input_file} \
   -resource:mills,known=true,training=true,truth=true,prior=12.0 ${gold_indel} \
   -an DP \
   -an FS \
@@ -358,7 +358,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T ApplyRecalibration \
   -R ${ref} \
-  --input ${input_file} \
+  -I ${input_file} \
   -mode INDEL \
   --ts_filter_level 99.0 \
   -recalFile ${input_file_2} \
