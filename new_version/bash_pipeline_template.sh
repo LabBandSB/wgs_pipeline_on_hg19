@@ -225,7 +225,7 @@ echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T HaplotypeCaller \
   -R ${ref} \
   -I ${input_file} \
-  -D ${dbsnp} \
+  --dbsnp ${dbsnp} \
   --genotyping_mode DISCOVERY \
   -stand_call_conf 30 \
   -o ${output_file} \
