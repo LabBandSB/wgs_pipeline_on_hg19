@@ -261,7 +261,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T VariantRecalibrator \
   -R ${ref} \
-  -I ${input_file} \
+  --input ${input_file} \
   -resource:hapmap,known=false,training=true,truth=true,prior=15.0 ${hapmap_snp} \
   -resource:omni,known=false,training=true,truth=true,prior=12.0 ${onmi_snp} \
   -resource:1000G,known=false,training=true,truth=false,prior=10.0 ${oneKG_snp} \
@@ -330,7 +330,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T VariantRecalibrator \
   -R ${ref} \
-  -I ${input_file} \
+  --input ${input_file} \
   -resource:mills,known=true,training=true,truth=true,prior=12.0 ${gold_indel} \
   -an DP \
   -an FS \
