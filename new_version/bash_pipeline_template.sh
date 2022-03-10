@@ -2,17 +2,26 @@
 
 
 mkdir -p ${alignment_dir}
+
+
 XMXVALUE="64G"
+FIRST_LOCK="${alignment_dir}/token.${sample}.__first_run_lock__"
+FINAL_LOCK="${alignment_dir}/token.${sample}.__final_lock__ "
+
+
+# check if already completed to rerun 
+[ -f  ${FINAL_LOCK} ] && \
+rm -f ${FIRST_LOCK} && \
+rm -f ${FINAL_LOCK} && \
+echo "RERUN ${sample}"
+
 
 # lock sample to prevent runnig from 2 servers 
-[ ! -f ${alignment_dir}/token.${sample}.__first_run_lock__ ] && \
-touch ${alignment_dir}/token.${sample}.__first_run_lock__ \
+[ ! -f ${FIRST_LOCK} ] && \
+dt1dt1=`date +%y%m%d_%H%M%S` && \
+echo ${dt1dt1} ${dt2dt2} > ${FIRST_LOCK} && \
+rm -f ${FINAL_LOCK} \
 || exit 1
-
-
-# remove final lock to indicate that the pipeline is not ended 
-rm -f ${alignment_dir}/token.${sample}.__final_lock__ 
-dt1dt1=`date +%y%m%d_%H%M%S` 
 
 
 # bwa alignment
@@ -509,12 +518,9 @@ dt2=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${dt2} > ${token} \
 || echo "TOKEN SKIPPED ${token}"
 
+
 # THE END 
 dt2dt2=`date +%y%m%d_%H%M%S` && \
-echo ${dt1dt1} ${dt2dt2} > ${alignment_dir}/token.${sample}.__final_lock__ 
+echo ${dt1dt1} ${dt2dt2} > ${FINAL_LOCK}
 
-echo "DONE!"
-echo "DONE!"
-echo "DONE!"
-echo "DONE!"
-echo "DONE!"
+echo "!!! ALIGNMENT DONE FOR SAMPLE=${sample} !!!"
