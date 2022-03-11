@@ -302,7 +302,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T ApplyRecalibration \
   -R ${ref} \
-  -I ${input_file} \
+  --input ${input_file} \
   -mode SNP \
   --ts_filter_level 99.0 \
   -recalFile ${input_file_2} \
@@ -367,7 +367,7 @@ dt1=`date +%y%m%d_%H%M%S` && \
 echo ${dt1} ${token} && \
 ${gatk} -Xmx${XMXVALUE} -T ApplyRecalibration \
   -R ${ref} \
-  -I ${input_file} \
+  --input ${input_file} \
   -mode INDEL \
   --ts_filter_level 99.0 \
   -recalFile ${input_file_2} \
