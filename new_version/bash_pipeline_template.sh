@@ -247,11 +247,12 @@ echo ${dt1} ${dt2} > ${token} \
 
 
 # #######
+# https://github.com/broadinstitute/gatk-docs/blob/master/gatk3-tutorials/(howto)_Recalibrate_variant_quality_scores_%3D_run_VQSR.md
 token="${alignment_dir}/token.${sample}.vcf_2_recal_tranches_gatk_VR_SNP"
 input_file="${alignment_dir}/${sample}.gatk_HC.vcf"
 output_file="${alignment_dir}/${sample}.gatk_VR_SNP.recal"
 output_file_2="${alignment_dir}/${sample}.gatk_VR_SNP.tranches"
-output_file_3="${alignment_dir}/${sample}.VR_SNP.R"
+output_file_3="${alignment_dir}/${sample}.gatk_VR_SNP_plots.R"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
 rm -f ${output_file} && \
@@ -288,6 +289,7 @@ echo ${dt1} ${dt2} > ${token} \
 
 
 # #######
+# https://github.com/broadinstitute/gatk-docs/blob/master/gatk3-tutorials/(howto)_Recalibrate_variant_quality_scores_%3D_run_VQSR.md
 token="${alignment_dir}/token.${sample}.vcf_2_vcf_gatk_AR_SNP_VQSR"
 input_file="${alignment_dir}/${sample}.gatk_HC.vcf"
 input_file_2="${alignment_dir}/${sample}.gatk_VR_SNP.recal"
@@ -316,11 +318,14 @@ echo ${dt1} ${dt2} > ${token} \
 
 
 # #######
+# https://github.com/broadinstitute/gatk-docs/blob/master/gatk3-tutorials/(howto)_Recalibrate_variant_quality_scores_%3D_run_VQSR.md
+# VariantRecalibrator should be used on at least 30 exomes or 1 whole genome.
+# to prevent no data error i set --maxGaussians to 1 
 token="${alignment_dir}/token.${sample}.vcf_2_recal_tranches_gatk_VR_INDEL"
 input_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.vcf"
 output_file="${alignment_dir}/${sample}.gatk_VR_INDEL.recal"
 output_file_2="${alignment_dir}/${sample}.gatk_VR_INDEL.tranches"
-output_file_3="${alignment_dir}/${sample}.VR_INDEL.R"
+output_file_3="${alignment_dir}/${sample}.gatk_VR_INDEL_plots.R"
 [ ! -f ${token} ] && \
 [ -f ${input_file} ] && \
 rm -f ${output_file} && \
@@ -341,7 +346,7 @@ ${gatk} -Xmx${XMXVALUE} -T VariantRecalibrator \
   -tranche 99.9 \
   -tranche 99.0 \
   -tranche 90.0 \
-  --maxGaussians 4 \
+  --maxGaussians 1 \
   -recalFile ${output_file} \
   -tranchesFile ${output_file_2} \
   -rscriptFile ${output_file_3} && \
@@ -353,6 +358,7 @@ echo ${dt1} ${dt2} > ${token} \
 
 
 # #######
+# https://github.com/broadinstitute/gatk-docs/blob/master/gatk3-tutorials/(howto)_Recalibrate_variant_quality_scores_%3D_run_VQSR.md
 token="${alignment_dir}/token.${sample}.vcf_2_vcf_gatk_AR_INDEL_VQSR"
 input_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.vcf"
 input_file_2="${alignment_dir}/${sample}.gatk_VR_INDEL.recal"
