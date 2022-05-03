@@ -104,6 +104,9 @@ echo ${dt1} ${dt2} > ${token} \
 || echo "TOKEN SKIPPED ${token}"
 
 
+# enhancement to increase temp folder from original /tmp 30 gb limit
+mkdir -p /home/tmp/
+export _JAVA_OPTIONS="-Djava.io.tmpdir=/home/tmp"
 # #######
 token="${alignment_dir}/token.${sample}.bam_2_bam_picard_MD"
 input_file="${alignment_dir}/${sample}.picard_ARRG.bam"
