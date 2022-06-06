@@ -1,27 +1,39 @@
-#this template is with step tokens 
-
+# this template is with step tokens
 
 mkdir -p ${alignment_dir}
-
-
 XMXVALUE="64G"
-FIRST_LOCK="${alignment_dir}/token.${sample}.__first_run_lock__"
-FINAL_LOCK="${alignment_dir}/token.${sample}.__final_lock__ "
 
 
-# check if already completed to rerun 
+###################################################################
+# first and final locks declaration BEGIN
+###################################################################
+FIRST_LOCK="${alignment_dir}/token.${sample}.__FIRST_LOCK__"
+FINAL_LOCK="${alignment_dir}/token.${sample}.__FINAL_LOCK__"
+HISTORY_LOCK="${alignment_dir}/token.${sample}._HISTORY_LOCK_"
+
+# tokens mode description:
+# (x, y) - first and final locks mode
+# (0, 0) - not started yet - feel free to start
+# (1, 0) - started, but not ended - don't touch - it runs somewhere
+# (0, 1) - don't started, but already ended - how? why ? - for now treated as (0, 0)
+# (1, 1) - started and ended - you can try rerun
+
+# (1, 1) - check if already completed to rerun
 [ -f  ${FINAL_LOCK} ] && \
 rm -f ${FIRST_LOCK} && \
 rm -f ${FINAL_LOCK} && \
 echo "RERUN ${sample}"
 
-
-# lock sample to prevent runnig from 2 servers 
+# (0, 0), (0, 1) - lock sample to prevent runnig from 2 servers
 [ ! -f ${FIRST_LOCK} ] && \
 dt1dt1=`date +%y%m%d_%H%M%S` && \
-echo ${dt1dt1} ${dt2dt2} > ${FIRST_LOCK} && \
+echo ${dt1dt1} > ${FIRST_LOCK} && \
+echo ${dt1dt1} >> ${HISTORY_LOCK} && \
 rm -f ${FINAL_LOCK} \
 || exit 1
+###################################################################
+# first and final locks declaration END
+###################################################################
 
 
 # bwa alignment
@@ -323,7 +335,7 @@ echo ${dt1} ${dt2} > ${token} \
 # #######
 # https://github.com/broadinstitute/gatk-docs/blob/master/gatk3-tutorials/(howto)_Recalibrate_variant_quality_scores_%3D_run_VQSR.md
 # VariantRecalibrator should be used on at least 30 exomes or 1 whole genome.
-# to prevent no data error i set --maxGaussians to 1 
+# to prevent no data error i set --maxGaussians to 1
 token="${alignment_dir}/token.${sample}.vcf_2_recal_tranches_gatk_VR_INDEL"
 input_file="${alignment_dir}/${sample}.gatk_AR_SNP_VQSR.vcf"
 output_file="${alignment_dir}/${sample}.gatk_VR_INDEL.recal"
@@ -528,8 +540,14 @@ echo ${dt1} ${dt2} > ${token} \
 || echo "TOKEN SKIPPED ${token}"
 
 
-# THE END 
+###################################################################
+# final locks declaration BEGIN
+###################################################################
 dt2dt2=`date +%y%m%d_%H%M%S` && \
 echo ${dt1dt1} ${dt2dt2} > ${FINAL_LOCK}
+###################################################################
+# final locks declaration END
+###################################################################
+
 
 echo "!!! ALIGNMENT DONE FOR SAMPLE=${sample} !!!"
