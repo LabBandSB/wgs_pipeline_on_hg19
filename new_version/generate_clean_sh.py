@@ -25,7 +25,7 @@ def main():
             }
             new_line = """
 alingment_di={alignment_dir}
-sampl=sample
+sample={sample}
 """.format(**d)
             f.write(new_line)
             f.write(open("clean_intermediate_files_template.sh").read())
