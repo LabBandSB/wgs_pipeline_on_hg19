@@ -23,9 +23,12 @@ def main():
                 'alignment_dir': os.path.join(project_dir, sample),
                 'sample': sample,
             }
-            for line in open("clean_intermediate_files_template.sh"):
-                new_line = line.format(**d)
-                f.write(new_line)
+            new_line = """
+alingment_di={alignment_dir}
+sampl=sample
+""".format(**d)
+            f.write(new_line)
+            f.write(open("clean_intermediate_files_template.sh").read())
 
 
 if __name__ == '__main__':
