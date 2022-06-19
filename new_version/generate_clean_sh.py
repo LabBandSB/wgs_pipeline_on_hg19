@@ -24,7 +24,7 @@ def main():
                 'sample': sample,
             }
             new_line = """
-alingment_di={alignment_dir}
+alignment_dir={alignment_dir}
 sample={sample}
 """.format(**d)
             f.write(new_line)
