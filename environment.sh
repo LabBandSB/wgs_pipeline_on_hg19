@@ -7,7 +7,7 @@ conda activate wgs
 conda install -c bioconda git python=3.9 # supplementary
 conda install -y -c anaconda perl # for perl-vcftools-vcf
 # broken # conda install -y -c dan_blanchard glibc # for bwa # seems it causes segmentation fault error
-yum install glibc glibc-devel # use instead 
+# yum install glibc glibc-devel # use instead, if needed
 
 conda install -c bioconda https://anaconda.org/bioconda/bwa/0.7.12/download/linux-64/bwa-0.7.12-1.tar.bz2
 conda install -c bioconda https://anaconda.org/bioconda/samtools/1.2/download/linux-64/samtools-1.2-2.tar.bz2
