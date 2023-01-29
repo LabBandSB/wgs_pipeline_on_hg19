@@ -10,7 +10,7 @@ d = {
     "RGPU": "SureSelectV4",
     "RGSM": "__sample__",
     "RGCN": "NLA",
-
+    #
     "fastqc": "fastqc",
     "bwa": "bwa",
     "samtools": "samtools",
@@ -23,7 +23,7 @@ d = {
     "vcf_merge": "vcf-merge",
     "bgzip": "bgzip",
     "tabix": "tabix",
-
+    #
     "dbsnp": "/home/PublicData/broadinstitute/2.8/hg19/dbsnp_138.hg19.vcf",
     "gold_indel": "/home/PublicData/broadinstitute/2.8/hg19/Mills_and_1000G_gold_standard.indels.hg19.sites.vcf",
     "hapmap_snp": "/home/PublicData/broadinstitute/2.8/hg19/hapmap_3.3.hg19.sites.vcf",
@@ -65,9 +65,7 @@ def load_fastq_samples(settings):
             sample = os.path.basename(fastq).split(R2_fastq_delimiter)[0]
             sample_dict[sample]["read2"] = fastq
     sample_dict = {
-        key: value
-        for key, value in sample_dict.items()
-        if key + "_m" not in sample_dict
+        key: value for key, value in sample_dict.items() if key + "_m" not in sample_dict
     }  # to exclude unmerged samples
     #
     return sample_dict
@@ -76,10 +74,11 @@ def load_fastq_samples(settings):
 def samples_dict_to_list(d):
     arr = [
         {
-            'sample': sample,
-            'read1': d[sample]['read1'],
-            'read2': d[sample]['read2'],
-        } for sample in d
+            "sample": sample,
+            "read1": d[sample]["read1"],
+            "read2": d[sample]["read2"],
+        }
+        for sample in d
     ]
     return arr
 
@@ -88,7 +87,7 @@ def prepare_sh_for_sample(sample_dict):
     d.update(sample_dict)
     sample = d["sample"]
     project_dir = d["project_dir"]
-    script_dir = d['script_dir']
+    script_dir = d["script_dir"]
 
     d["alignment_dir"] = os.path.join(project_dir, sample)
 
@@ -118,14 +117,15 @@ def main():
     samples_dict = load_fastq_samples(settings)
     samples_list = samples_dict_to_list(samples_dict)
 
-    script_dir = settings['script_dir']
+    script_dir = settings["script_dir"]
+    print(f"script_dir: {script_dir}")
     os.makedirs(script_dir, exist_ok=True)
 
     for sample_dict in samples_list:
-        sample_dict['script_dir'] = settings['script_dir']
-        sample_dict['project_dir'] = settings['project_dir']
+        sample_dict["script_dir"] = settings["script_dir"]
+        sample_dict["project_dir"] = settings["project_dir"]
         prepare_sh_for_sample(sample_dict)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
