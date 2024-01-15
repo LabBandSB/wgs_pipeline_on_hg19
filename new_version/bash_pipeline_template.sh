@@ -1,4 +1,5 @@
 # this template is with step tokens
+# todo rename to bash_ssap_template.sh
 
 mkdir -p ${alignment_dir}
 XMXVALUE="64G"
