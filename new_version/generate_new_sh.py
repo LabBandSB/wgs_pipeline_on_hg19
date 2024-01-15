@@ -65,7 +65,9 @@ def load_fastq_samples(settings):
             sample = os.path.basename(fastq).split(R2_fastq_delimiter)[0]
             sample_dict[sample]["read2"] = fastq
     sample_dict = {
-        key: value for key, value in sample_dict.items() if key + "_m" not in sample_dict
+        key: value
+        for key, value in sample_dict.items()
+        if key + "_m" not in sample_dict
     }  # to exclude unmerged samples
     #
     return sample_dict

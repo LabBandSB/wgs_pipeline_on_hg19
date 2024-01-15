@@ -71,7 +71,9 @@ def parse_arguments_to_settings():
     if args.settings_json:
         settings = json.load(open(args.settings_json))  # config exist, import it
         __samples_dict__ = load_fastq_samples(settings)  # find all fastq files
-        __samples_list__ = settings["samples_list"]  # get list of target samples from config
+        __samples_list__ = settings[
+            "samples_list"
+        ]  # get list of target samples from config
         settings["samples_dict"] = {  # filter target samples from all fastq
             list_key: dict_value
             for list_key in __samples_list__
@@ -115,11 +117,7 @@ def load_fastq_samples(settings):
             res[sample]["read1"] = fastq
         elif fastq.endswith(R2_fastq_extension):
             res[sample]["read2"] = fastq
-    res = {
-        key: value
-        for key, value in res.items()
-        if key + "_m" not in res
-    }
+    res = {key: value for key, value in res.items() if key + "_m" not in res}
     return res
 
 
@@ -171,7 +169,7 @@ def get_default_settings(d):
             "RGPL": "ILLUMINA",
             "RGPU": "SureSelectV4",
             "RGSM": "__sample__",
-            "RGCN": "NLA"
+            "RGCN": "NLA",
         },
         "tools": {
             "fastqc": "",
@@ -203,7 +201,7 @@ def get_default_settings(d):
             "target_region": "/home/PublicData/Agilent_v4_71m_reduced.bed",
             "#ensembl_ref_dir": "/home/PublicData/ensembl_GRCh37_75/",
             "#ensembl_ref_fa": "/home/PublicData/ensembl_GRCh37_75/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa",
-            "#ensembl_ref_gtf": "/home/PublicData/ensembl_GRCh37_75/Homo_sapiens.GRCh37.75.gtf"
+            "#ensembl_ref_gtf": "/home/PublicData/ensembl_GRCh37_75/Homo_sapiens.GRCh37.75.gtf",
         },
     }
     return default_settings_dict
@@ -222,8 +220,12 @@ def run_pipeline(settings):
         write_cmd_list_to_file(sample_settings, cmd_list)
     # debug print
     print(f"# ls {settings['project_script_dir']}")
-    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do echo $i; done")
-    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do qsub $i; done")
+    print(
+        f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do echo $i; done"
+    )
+    print(
+        f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do qsub $i; done"
+    )
 
 
 def get_settings_for_SSAP(sample_dict):
@@ -235,14 +237,12 @@ def get_settings_for_SSAP(sample_dict):
         "sample_dir": sample_dir,
         "project_script_dir": sample_dict["project_script_dir"],
         "number_of_threads": sample_dict["number_of_threads"],
-
         "bwa": sample_dict["tools"]["bwa"],
         "samtools": sample_dict["tools"]["samtools"],
         "picard": sample_dict["tools"]["picard"],
         "gatk": sample_dict["tools"]["gatk"],
         "vcf_concat": sample_dict["tools"]["vcf_concat"],
         "vcf_sort": sample_dict["tools"]["vcf_sort"],
-
         "ref": sample_dict["databases"]["ref_ucsc_hg19"],
         "gold_indel": sample_dict["databases"]["gold_indel"],
         "oneKG_indel": sample_dict["databases"]["oneKG_indel"],
@@ -250,61 +250,61 @@ def get_settings_for_SSAP(sample_dict):
         "oneKG_snp": sample_dict["databases"]["oneKG_snp"],
         "hapmap_snp": sample_dict["databases"]["hapmap_snp"],
         "onmi_snp": sample_dict["databases"]["onmi_snp"],
-
         "read1": sample_dict["samples_dict"][sample]["read1"],
         "read2": sample_dict["samples_dict"][sample]["read2"],
-
         "sam": sample_path_prefix + ".mem.sam",
         "bam": sample_path_prefix + ".view.bam",
         "sorted_bam": sample_path_prefix + ".sorted.bam",
         "sorted_tmp": sample_path_prefix + ".sorted.tmp",
-
-        "RGID": sample if sample_dict["read_group"]["RGID"] == "__sample__" else sample_dict["read_group"]["RGID"],
-        "RGLB": sample if sample_dict["read_group"]["RGLB"] == "__sample__" else sample_dict["read_group"]["RGLB"],
-        "RGPL": sample if sample_dict["read_group"]["RGPL"] == "__sample__" else sample_dict["read_group"]["RGPL"],
-        "RGPU": sample if sample_dict["read_group"]["RGPU"] == "__sample__" else sample_dict["read_group"]["RGPU"],
-        "RGSM": sample if sample_dict["read_group"]["RGSM"] == "__sample__" else sample_dict["read_group"]["RGSM"],
-        "RGCN": sample if sample_dict["read_group"]["RGCN"] == "__sample__" else sample_dict["read_group"]["RGCN"],
-
+        "RGID": sample
+        if sample_dict["read_group"]["RGID"] == "__sample__"
+        else sample_dict["read_group"]["RGID"],
+        "RGLB": sample
+        if sample_dict["read_group"]["RGLB"] == "__sample__"
+        else sample_dict["read_group"]["RGLB"],
+        "RGPL": sample
+        if sample_dict["read_group"]["RGPL"] == "__sample__"
+        else sample_dict["read_group"]["RGPL"],
+        "RGPU": sample
+        if sample_dict["read_group"]["RGPU"] == "__sample__"
+        else sample_dict["read_group"]["RGPU"],
+        "RGSM": sample
+        if sample_dict["read_group"]["RGSM"] == "__sample__"
+        else sample_dict["read_group"]["RGSM"],
+        "RGCN": sample
+        if sample_dict["read_group"]["RGCN"] == "__sample__"
+        else sample_dict["read_group"]["RGCN"],
         "ARRG_bam": sample_path_prefix + ".ARRG.bam",
         "MD_bam": sample_path_prefix + ".MD.bam",
         "MD_metrics_txt": sample_path_prefix + ".MD_picard_metrics.txt",
         "MD_flagstat_txt": sample_path_prefix + ".MD_samtools_flagstat.txt",
-
         "RTC_intervals": sample_path_prefix + ".RTC.intervals",
         "IR_bam": sample_path_prefix + ".IR.bam",
         "BR_table": sample_path_prefix + ".BR_table.txt",
         "BQSR_BR_table": sample_path_prefix + ".BQSR_BR_table.txt",
         "AC_plot_pdf": sample_path_prefix + ".AC_plot.pdf",
         "BQSR_BR_bam": sample_path_prefix + ".BQSR_BR.bam",
-
         "gatk_HC_vcf": sample_path_prefix + ".HC.vcf",
-
         "gatk_VR_SNP_recal": sample_path_prefix + ".HC.VR_SNP.recal",
         "gatk_VR_SNP_tranches": sample_path_prefix + ".HC.VR_SNP.tranches",
         "gatk_VR_SNP_plots": sample_path_prefix + ".HC.VR_SNP_plots.R",
         "gatk_AR_SNP_vcf": sample_path_prefix + ".HC.VQSR_AR_SNP.vcf",
-
         "gatk_VR_INDEL_recal": sample_path_prefix + ".HC.VR_INDEL.recal",
         "gatk_VR_INDEL_tranches": sample_path_prefix + ".HC.VR_INDEL.tranches",
         "gatk_VR_INDEL_plots": sample_path_prefix + ".HC.VR_INDEL_plots.R",
         "gatk_AR_INDEL_vcf": sample_path_prefix + ".HC.VQSR_AR_SNP.VQSR_AR_INDEL.vcf",
-
         "gatk_SV_SNP_raw_vcf": sample_path_prefix + ".HC.VQSR.raw_snp.vcf",
         "gatk_SV_SNP_fil_vcf": sample_path_prefix + ".HC.VQSR.fil_snp.vcf",
-
         "gatk_SV_INDEL_raw_vcf": sample_path_prefix + ".HC.VQSR.raw_indel.vcf",
         "gatk_SV_INDEL_fil_vcf": sample_path_prefix + ".HC.VQSR.fil_indel.vcf",
-
         "vcftools_concat_vcf": sample_path_prefix + ".FINAL.concat.vcf",
         "vcftools_sorted_vcf": sample_path_prefix + ".FINAL.sorted.vcf",
-
         "run_annovar": sample_dict["run_annovar"],
         "annovar_output": sample_path_prefix + ".FINAL.annovar",
         "annovar_txt": sample_path_prefix + ".FINAL.annovar.hg19_multianno.txt",
         "annovar_vcf": sample_path_prefix + ".FINAL.annovar.hg19_multianno.vcf",
-        "annovar_header_txt": sample_path_prefix + ".FINAL.annovar.hg19_multianno.header.txt",
-
+        "annovar_header_txt": sample_path_prefix
+        + ".FINAL.annovar.hg19_multianno.header.txt",
         "add_tokens": sample_dict["add_tokens"],
         "debug": sample_dict["debug"],
     }
@@ -322,14 +322,12 @@ def get_cmd_list_for_SSAP(sample_settings):
         get_cmd_samtools_sort_bam(sample_settings),
         get_cmd_picard_ARRG_bam(sample_settings),
         get_cmd_picard_MD_bam(sample_settings),
-
         get_cmd_gatk_RTC_intervals(sample_settings),
         get_cmd_gatk_IR_bam(sample_settings),
         get_cmd_gatk_BR_table(sample_settings),
         get_cmd_gatk_BQSR_BR_table(sample_settings),
         get_cmd_gatk_AC_pdf(sample_settings),
         get_cmd_gatk_PR_bam(sample_settings),
-
         get_cmd_gatk_HC_vcf(sample_settings),
         get_cmd_gatk_VR_SNP_recal_tranches(sample_settings),
         get_cmd_gatk_AR_SNP_vcf(sample_settings),
@@ -339,11 +337,9 @@ def get_cmd_list_for_SSAP(sample_settings):
         get_cmd_gatk_VF_SNP_fil_vcf(sample_settings),
         get_cmd_gatk_SV_INDEL_raw_vcf(sample_settings),
         get_cmd_gatk_VF_INDEL_fil_vcf(sample_settings),
-
         get_cmd_vcf_concat(sample_settings),
         get_cmd_vcf_sort(sample_settings),
-
-        clear_after_competion(sample_settings)
+        clear_after_competion(sample_settings),
     ]
     if sample_settings["run_annovar"]:
         cmd_list += [
@@ -367,7 +363,9 @@ def reduce_spaces_and_newlines(s):
 
 def get_cmd(d):
     d["token"] = "{sample_dir}/token.{sample}.{token_suffix}".format(**d)
-    d["flags"] = " && ".join([" [ -f {:s} ] ".format(i) for i in d["files_list"]]) + " && [ ! -f {token} ] ".format(**d)
+    d["flags"] = " && ".join(
+        [" [ -f {:s} ] ".format(i) for i in d["files_list"]]
+    ) + " && [ ! -f {token} ] ".format(**d)
     if d["add_tokens"]:
         cmd = """
             {flags} &&
@@ -378,7 +376,9 @@ def get_cmd(d):
             dt2=`date +%y%m%d_%H%M%S` &&
             echo $dt1 $dt2 > {token} ||
             echo "TOKEN SKIPPED {token}"
-            """.format(**d)
+            """.format(
+            **d
+        )
     else:
         cmd = "{main_cmd}".format(**d)
     return reduce_spaces_and_newlines(cmd)
@@ -395,7 +395,9 @@ def clear_after_competion(d):
             {gatk_AR_SNP_vcf} {gatk_AR_INDEL_vcf}
             {gatk_SV_SNP_raw_vcf}  {gatk_SV_INDEL_raw_vcf}
             {vcftools_concat_vcf}
-            """.format(**d)
+            """.format(
+            **d
+        )
         # {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} # for vcftools concatenate - sometimes library doesnt loaded well
     else:
         cmd = ""
@@ -412,7 +414,11 @@ def get_cmd_bwa_mem_sam(d):
 
 
 def bash_bwa_mem_sam(d):
-    return """{bwa} mem -M -t {number_of_threads} {ref} {read1} {read2} > {sam}""".format(**d)
+    return (
+        """{bwa} mem -M -t {number_of_threads} {ref} {read1} {read2} > {sam}""".format(
+            **d
+        )
+    )
 
 
 ###############################################################################
@@ -438,7 +444,11 @@ def get_cmd_samtools_sort_bam(d):
 
 
 def bash_samtools_sort_bam(d):
-    return """{samtools} sort -l 9 -O bam -T {sorted_tmp} {bam} > {sorted_bam}""".format(**d)
+    return (
+        """{samtools} sort -l 9 -O bam -T {sorted_tmp} {bam} > {sorted_bam}""".format(
+            **d
+        )
+    )
 
 
 ###############################################################################
@@ -466,7 +476,9 @@ def bash_picard_ARRG_bam(d):
         CREATE_INDEX=true
         VALIDATION_STRINGENCY=LENIENT
         MAX_RECORDS_IN_RAM=1000000
-        """.format(**d)
+        """.format(
+        **d
+    )
     # TMP_DIR={tmp_dir}
 
 
@@ -490,7 +502,9 @@ def bash_picard_MD_bam(d):
         CREATE_INDEX=true
         VALIDATION_STRINGENCY=LENIENT
         MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000
-        """.format(**d)
+        """.format(
+        **d
+    )
     # TMP_DIR={tmp_dir}
 
 
@@ -512,7 +526,9 @@ def bash_gatk_RTC_intervals(d):
         -known {gold_indel}
         -known {oneKG_indel}
         -o {RTC_intervals}
-        """.format(**d)
+        """.format(
+        **d
+    )
     # -L {target_region}
 
 
@@ -535,7 +551,9 @@ def bash_gatk_IR_bam(d):
         -known {gold_indel}
         -known {oneKG_indel}
         -o {IR_bam}
-        """.format(**d)
+        """.format(
+        **d
+    )
     # -L {target_region}
 
 
@@ -558,7 +576,9 @@ def bash_gatk_BR_table(d):
         -knownSites {gold_indel}
         -knownSites {oneKG_indel}
         -o {BR_table}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -581,7 +601,9 @@ def bash_gatk_BQSR_BR_table(d):
         -knownSites {oneKG_indel}
         -BQSR {BR_table}
         -o {BQSR_BR_table}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -601,7 +623,9 @@ def bash_gatk_AC_pdf(d):
         -before {BR_table}
         -after {BQSR_BR_table}
         -plots {AC_plot_pdf}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -621,7 +645,9 @@ def bash_gatk_PR_bam(d):
         -I {IR_bam}
         -BQSR {BQSR_BR_table}
         -o {BQSR_BR_bam}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -644,7 +670,9 @@ def bash_gatk_HC_vcf(d):
         -stand_call_conf 30
         -o {gatk_HC_vcf}
         -nct {number_of_threads}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -669,7 +697,9 @@ def bash_gatk_UG_vcf(d):  # not ready tested
         -nct {number_of_threads}
         --max_num_PL_values 100
         --min_base_quality_score 17
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -702,12 +732,18 @@ def bash_gatk_VR_SNP_recal_tranches(d):
         -recalFile {gatk_VR_SNP_recal}
         -tranchesFile {gatk_VR_SNP_tranches}
         -rscriptFile {gatk_VR_SNP_plots}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
 def get_cmd_gatk_AR_SNP_vcf(d):
-    d["files_list"] = [d["gatk_HC_vcf"], d["gatk_VR_SNP_recal"], d["gatk_VR_SNP_tranches"]]
+    d["files_list"] = [
+        d["gatk_HC_vcf"],
+        d["gatk_VR_SNP_recal"],
+        d["gatk_VR_SNP_tranches"],
+    ]
     d["token_suffix"] = "gatk_HC_vcf_2_AR_SNP_vcf"
     d["out_file"] = d["gatk_AR_SNP_vcf"]
     d["main_cmd"] = bash_gatk_AR_SNP_vcf(d)
@@ -725,7 +761,9 @@ def bash_gatk_AR_SNP_vcf(d):
         -recalFile {gatk_VR_SNP_recal}
         -tranchesFile {gatk_VR_SNP_tranches}
         -o {gatk_AR_SNP_vcf}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -754,12 +792,18 @@ def bash_gatk_VR_INDEL_recal_tranches(d):
         -recalFile {gatk_VR_INDEL_recal}
         -tranchesFile {gatk_VR_INDEL_tranches}
         -rscriptFile {gatk_VR_INDEL_plots}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
 def get_cmd_gatk_AR_INDEL_vcf(d):
-    d["files_list"] = [d["gatk_AR_SNP_vcf"], d["gatk_VR_INDEL_recal"], d["gatk_VR_INDEL_tranches"]]
+    d["files_list"] = [
+        d["gatk_AR_SNP_vcf"],
+        d["gatk_VR_INDEL_recal"],
+        d["gatk_VR_INDEL_tranches"],
+    ]
     d["token_suffix"] = "gatk_AR_SNP_vcf_2_AR_SNP_AR_INDEL_vcf"
     d["out_file"] = d["gatk_AR_INDEL_vcf"]
     d["main_cmd"] = bash_gatk_AR_INDEL_vcf(d)
@@ -777,7 +821,9 @@ def bash_gatk_AR_INDEL_vcf(d):
         -recalFile {gatk_VR_INDEL_recal}
         -tranchesFile {gatk_VR_INDEL_tranches}
         -o {gatk_AR_INDEL_vcf}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -797,7 +843,9 @@ def bash_gatk_SV_SNP_raw_vcf(d):
         -V {gatk_AR_INDEL_vcf}
         -selectType SNP
         -o {gatk_SV_SNP_raw_vcf}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -818,7 +866,9 @@ def bash_gatk_VF_SNP_fil_vcf(d):
         --filterExpression "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0"
         --filterName "SNP_FAIL"
         -o {gatk_SV_SNP_fil_vcf}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -838,7 +888,9 @@ def bash_gatk_SV_INDEL_raw_vcf(d):
         -V {gatk_AR_INDEL_vcf}
         -selectType INDEL
         -o {gatk_SV_INDEL_raw_vcf}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -859,7 +911,9 @@ def bash_gatk_VF_INDEL_fil_vcf(d):
         --filterExpression "QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0"
         --filterName "INDEL_FAIL"
         -o {gatk_SV_INDEL_fil_vcf}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -872,7 +926,9 @@ def get_cmd_vcf_concat(d):
 
 
 def bash_vcf_concat(d):
-    return """{vcf_concat} {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} > {vcftools_concat_vcf}""".format(**d)
+    return """{vcf_concat} {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} > {vcftools_concat_vcf}""".format(
+        **d
+    )
 
 
 ###############################################################################
@@ -885,7 +941,9 @@ def get_cmd_vcf_sort(d):
 
 
 def bash_vcf_sort(d):
-    return """cat {vcftools_concat_vcf} | {vcf_sort} > {vcftools_sorted_vcf}""".format(**d)
+    return """cat {vcftools_concat_vcf} | {vcf_sort} > {vcftools_sorted_vcf}""".format(
+        **d
+    )
 
 
 ###############################################################################
@@ -900,8 +958,12 @@ def get_cmd_annovar(d):
 def bash_annovar(d):
     input_file = d["vcftools_sorted_vcf"]
     output_file = d["annovar_output"]
-    table_annovar = "perl /home/PublicData/annovar_src/annovar_20190101/table_annovar.pl"
-    convert2annovar = "perl /home/PublicData/annovar_src/annovar_20190101/convert2annovar.pl"
+    table_annovar = (
+        "perl /home/PublicData/annovar_src/annovar_20190101/table_annovar.pl"
+    )
+    convert2annovar = (
+        "perl /home/PublicData/annovar_src/annovar_20190101/convert2annovar.pl"
+    )
     annovar_db_folder = "/home/PublicData/annovar_src/annovar_20190101/humandb"
 
     db_gene = [
@@ -975,7 +1037,10 @@ def bash_annovar(d):
 
 ###############################################################################
 def get_cmd_annovar_add_header(d):
-    d["files_list"] = [d["annovar_txt"], d["annovar_vcf"], ]
+    d["files_list"] = [
+        d["annovar_txt"],
+        d["annovar_vcf"],
+    ]
     d["token_suffix"] = "annovar_add_header"
     d["out_file"] = d["annovar_header_txt"]
     d["main_cmd"] = bash_annovar_add_header(d)
@@ -984,7 +1049,8 @@ def get_cmd_annovar_add_header(d):
 
 def bash_annovar_add_header(d):
     return """ python /home/PublicData/annovar_src/python/add_header.py -v {annovar_vcf} -t {annovar_txt} """.format(
-        **d)
+        **d
+    )
 
 
 ###############################################################################

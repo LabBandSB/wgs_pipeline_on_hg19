@@ -68,39 +68,92 @@ def main():
 
 def parse_arguments_to_settings():
     parser = argparse.ArgumentParser()
-    parser.add_argument("-j", "--settings_json", default=None, required=False,
-                        help="generated and edited json with all required parameters (after STEP_1)")
-    parser.add_argument("-d", "--draft_settings_json", default=None, required=False,
-                        help="path to draft_json with local variables like tools and databases")
-    parser.add_argument("-p", "--project_root", default=None, required=False,
-                        help="folder to be created that will store pipeline output")
-    parser.add_argument("-s", "--script_dir_name", default=None, required=False,
-                        help="folder to store all runnable scripts, usually scripts")
-    parser.add_argument("-n", "--project_settings_json_name", default=None, required=False,
-                        help="folder to be created that will store pipeline output")
-    parser.add_argument("-f", "--fastq_dirs_list", default=None, required=False, nargs="+",
-                        help="")
-    parser.add_argument("--fastq_extension", default=None, required=False,
-                        help="extension of input files, usually .fastq.gz or.fastq")
-    parser.add_argument("--R1_fastq_extension", default=None, required=False,
-                        help="extension to distinguish R1 from R2")
-    parser.add_argument("--R2_fastq_extension", default=None, required=False,
-                        help="extension to distinguish R2 from R1")
-    parser.add_argument("--R1_fastq_delimiter", default=None, required=False,
-                        help="delimiter to distinguish R1 from R2")
-    parser.add_argument("--R2_fastq_delimiter", default=None, required=False,
-                        help="delimiter to distinguish R2 from R1")
-    parser.add_argument("--no_tokens", action="store_true",
-                        help="skips tokens that distinguish steps completed, only clear commands ")
-    parser.add_argument("--debug", action="store_true",
-                        help="print additional info messages")
-    parser.add_argument("--clean_after", action="store_true",
-                        help="add cleaning cmd to pipeline")
+    parser.add_argument(
+        "-j",
+        "--settings_json",
+        default=None,
+        required=False,
+        help="generated and edited json with all required parameters (after STEP_1)",
+    )
+    parser.add_argument(
+        "-d",
+        "--draft_settings_json",
+        default=None,
+        required=False,
+        help="path to draft_json with local variables like tools and databases",
+    )
+    parser.add_argument(
+        "-p",
+        "--project_root",
+        default=None,
+        required=False,
+        help="folder to be created that will store pipeline output",
+    )
+    parser.add_argument(
+        "-s",
+        "--script_dir_name",
+        default=None,
+        required=False,
+        help="folder to store all runnable scripts, usually scripts",
+    )
+    parser.add_argument(
+        "-n",
+        "--project_settings_json_name",
+        default=None,
+        required=False,
+        help="folder to be created that will store pipeline output",
+    )
+    parser.add_argument(
+        "-f", "--fastq_dirs_list", default=None, required=False, nargs="+", help=""
+    )
+    parser.add_argument(
+        "--fastq_extension",
+        default=None,
+        required=False,
+        help="extension of input files, usually .fastq.gz or.fastq",
+    )
+    parser.add_argument(
+        "--R1_fastq_extension",
+        default=None,
+        required=False,
+        help="extension to distinguish R1 from R2",
+    )
+    parser.add_argument(
+        "--R2_fastq_extension",
+        default=None,
+        required=False,
+        help="extension to distinguish R2 from R1",
+    )
+    parser.add_argument(
+        "--R1_fastq_delimiter",
+        default=None,
+        required=False,
+        help="delimiter to distinguish R1 from R2",
+    )
+    parser.add_argument(
+        "--R2_fastq_delimiter",
+        default=None,
+        required=False,
+        help="delimiter to distinguish R2 from R1",
+    )
+    parser.add_argument(
+        "--no_tokens",
+        action="store_true",
+        help="skips tokens that distinguish steps completed, only clear commands ",
+    )
+    parser.add_argument(
+        "--debug", action="store_true", help="print additional info messages"
+    )
+    parser.add_argument(
+        "--clean_after", action="store_true", help="add cleaning cmd to pipeline"
+    )
     #
     args = parser.parse_args()
     if args.settings_json:
         settings = json.load(open(args.settings_json))  # config exist, import it
-        __samples_list__ = settings["samples_list"]  # get list of target samples from config
+        __samples_list__ = settings[
+            "samples_list"
+        ]  # get list of target samples from config
         __samples_dict__ = load_fastq_samples(settings)  # find all fastq files
         settings["samples_dict"] = {  # filter target samples from all fastq
             list_key: dict_value
@@ -110,7 +163,11 @@ def parse_arguments_to_settings():
         }
         settings["STATE"] = STATE.STEP_3
     elif args.project_root and args.fastq_dirs_list:
-        draft_settings_file = args.draft_settings_json if args.draft_settings_json else SETTINGS.DRAFT_SETTINGS_JSON
+        draft_settings_file = (
+            args.draft_settings_json
+            if args.draft_settings_json
+            else SETTINGS.DRAFT_SETTINGS_JSON
+        )
         settings = json.load(open(draft_settings_file))
         project_settings = {
             "draft_settings_json": args.draft_settings_json,
@@ -119,7 +176,6 @@ def parse_arguments_to_settings():
             "project_settings_json_name": args.project_settings_json_name,
             "fastq_dirs_list": args.fastq_dirs_list,
             "fastq_extension": args.fastq_extension,
-
             "R1_fastq_delimiter": args.R1_fastq_delimiter,
             "R2_fastq_delimiter": args.R2_fastq_delimiter,
             "R1_fastq_extension": args.R1_fastq_extension,
@@ -189,8 +245,12 @@ def run_pipeline(settings):
     # debug print
     print(f"# ls {settings['project_script_dir']}")
     print(f"# cd {settings['project_script_dir']}")
-    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do echo $i; done")
-    print(f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do qsub $i; done")
+    print(
+        f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do echo $i; done"
+    )
+    print(
+        f"# cd {settings['project_script_dir']}; for i in $( ls *.ss.sh ); do qsub $i; done"
+    )
 
 
 def save_project_settings_json(settings):
@@ -225,11 +285,9 @@ def save_draft_settings_json():
             "R2_fastq_extension": ".R2.fastq.gz",
             "R1_fastq_delimiter": "_",
             "R2_fastq_delimiter": "_",
-
             "no_tokens": False,
             "debug": False,
             "samples_list": [],
-
             # for picard_ARRG block
             "RGID": "__sample__",
             "RGLB": "__sample__",
@@ -237,7 +295,6 @@ def save_draft_settings_json():
             "RGPU": "SureSelectV4",
             "RGSM": "__sample__",
             "RGCN": "NLA",
-
             # tools block
             "fastqc": "fastqc",
             "bwa": "bwa",
@@ -251,7 +308,6 @@ def save_draft_settings_json():
             "vcf_merge:": "vcf-merge",
             "bgzip": "bgzip",
             "tabix": "tabix",
-
             # databases block
             "ref": "/home/PublicData/broadinstitute/2.8/hg19/ucsc.hg19.ref/ucsc.hg19.fasta",
             "ref_ucsc_hg19": "/home/PublicData/broadinstitute/2.8/hg19/ucsc.hg19.ref/ucsc.hg19.fasta",
@@ -285,51 +341,39 @@ def get_settings_for_SSAP(sample_dict):
     _dict = {
         "sample": sample,
         "sample_dir": sample_dir,
-
         "read1": sample_dict["samples_dict"][sample]["read1"],
         "read2": sample_dict["samples_dict"][sample]["read2"],
-
         "sam_bwa_mem": sample_path_prefix + ".bwa_mem.sam",
         "bam_samtools_view": sample_path_prefix + ".samtools_view.bam",
         "bam_samtools_sort": sample_path_prefix + ".samtools_sort.bam",
         "bam_picard_ARRG": sample_path_prefix + ".picard_ARRG.bam",
-
         "RGID": sample if sample_dict["RGID"] == "__sample__" else sample_dict["RGID"],
         "RGLB": sample if sample_dict["RGLB"] == "__sample__" else sample_dict["RGLB"],
         "RGPL": sample if sample_dict["RGPL"] == "__sample__" else sample_dict["RGPL"],
         "RGPU": sample if sample_dict["RGPU"] == "__sample__" else sample_dict["RGPU"],
         "RGSM": sample if sample_dict["RGSM"] == "__sample__" else sample_dict["RGSM"],
         "RGCN": sample if sample_dict["RGCN"] == "__sample__" else sample_dict["RGCN"],
-
         "bam_picard_MD": sample_path_prefix + ".picard_MD.bam",
         "txt_picard_MD": sample_path_prefix + ".picard_MD.metrix.txt",
-
         "bam_picard_SS_SNAUT": sample_path_prefix + ".picard_SS_SNAUT.bam",
-
         "table_gatk_BR": sample_path_prefix + ".gatk_BR.table",
         "table_gatk_BR_BQSR": sample_path_prefix + ".gatk_BR_BQSR.table",
         "pdf_gatk_AC": sample_path_prefix + ".gatk_AC.pdf",
         "bam_gatk_PR_BR_BQSR": sample_path_prefix + ".gatk_PR_BR_BQSR.bam",
-
         "vcf_gatk_HC": sample_path_prefix + ".gatk_HC.vcf",
         "bam_gatk_HC": sample_path_prefix + ".gatk_HC.bam",
-
         "recal_gatk_VR_SNP": sample_path_prefix + ".gatk_VR_SNP.recal",
         "tranches_gatk_VR_SNP": sample_path_prefix + ".gatk_VR_SNP.tranches",
         "plots_gatk_VR_SNP": sample_path_prefix + ".gatk_VR_SNP_plots.Rscript",
         "vcf_gatk_AR_SNP": sample_path_prefix + ".gatk_AR_SNP.vcf",
-
         "recal_gatk_VR_INDEL": sample_path_prefix + ".gatk_VR_INDEL.recal",
         "tranches_gatk_VR_INDEL": sample_path_prefix + ".gatk_VR_INDEL.tranches",
         "plots_gatk_VR_INDEL": sample_path_prefix + ".gatk_VR_INDEL_plots.Rscript",
         "vcf_gatk_AR_INDEL": sample_path_prefix + ".gatk_AR_INDEL.vcf",
-
         "vcf_gatk_SV_SNP_raw": sample_path_prefix + ".gatk_SV_SNP_raw.vcf",
         "vcf_gatk_SV_SNP_fil": sample_path_prefix + ".gatk_SV_SNP_fil.vcf",
-
         "vcf_gatk_SV_INDEL_raw": sample_path_prefix + ".gatk_SV_INDEL_raw.vcf",
         "vcf_gatk_SV_INDEL_fil": sample_path_prefix + ".gatk_SV_INDEL_fil.vcf",
-
         "vcf_vcftools_concat": sample_path_prefix + ".vcftools_concat.FINAL.vcf",
         "vcf_vcftools_sorted": sample_path_prefix + ".vcftools_sorted.FINAL.vcf",
     }
@@ -344,37 +388,31 @@ def get_cmd_list_for_SSAP(sample_settings):
     cmd_list = [
         get_mkdir_cmd(sample_settings),
         get_lock_on_sample(sample_settings),
-
         get_cmd_bwa_mem_sam(sample_settings),
         get_cmd_samtools_view_bam(sample_settings),
         get_cmd_samtools_sort_bam(sample_settings),
         get_cmd_picard_ARRG_bam(sample_settings),
         get_cmd_picard_MD_bam(sample_settings),
-
         get_cmd_gatk_BR_table(sample_settings),
         get_cmd_gatk_BR_BQSR_table(sample_settings),
         get_cmd_gatk_AC_pdf(sample_settings),
         get_cmd_gatk_PR_bam(sample_settings),
-
         get_cmd_gatk_HC_vcf(sample_settings),
-
         get_cmd_gatk_VR_SNP_recal_tranches(sample_settings),
         get_cmd_gatk_AR_SNP_vcf(sample_settings),
-
         get_cmd_gatk_VR_INDEL_recal_tranches(sample_settings),
         get_cmd_gatk_AR_INDEL_vcf(sample_settings),
-
         get_cmd_gatk_SV_SNP_raw_vcf(sample_settings),
         get_cmd_gatk_VF_SNP_fil_vcf(sample_settings),
-
         get_cmd_gatk_SV_INDEL_raw_vcf(sample_settings),
         get_cmd_gatk_VF_INDEL_fil_vcf(sample_settings),
-
         get_cmd_vcf_concat(sample_settings),
         get_cmd_vcf_sort(sample_settings),
     ]
     if "clean_after" in sample_settings and sample_settings["clean_after"]:
-        cmd_list += [clear_after_competion(sample_settings), ]
+        cmd_list += [
+            clear_after_competion(sample_settings),
+        ]
     return cmd_list
 
 
@@ -382,13 +420,15 @@ def get_cmd_list_for_SSAP(sample_settings):
 def get_mkdir_cmd(d):
     return "mkdir -p {sample_dir}".format(**d)
 
+
 ###############################################################################
 def get_lock_on_sample(d):
-    ''' lock file to lock rerunning same sample from different workers'''
-    d['token_suffix'] = '__first_run_lock__'
+    """lock file to lock rerunning same sample from different workers"""
+    d["token_suffix"] = "__first_run_lock__"
     d["token"] = "{sample_dir}/token.{sample}.{token_suffix}".format(**d)
     cmd = """[ ! -f {token} ] && touch {token} || exit 1""".format(**d)
     return cmd
+
 
 ###############################################################################
 def reduce_spaces_and_newlines(func):
@@ -407,8 +447,9 @@ def get_cmd(d):
         cmd = "{main_cmd}".format(**d)
     else:
         d["token"] = "{sample_dir}/token.{sample}.{token_suffix}".format(**d)
-        d["flags"] = " && ".join([" [ -f {:s} ] ".format(i) for i in d["files_list"]]) + \
-                     " && [ ! -f {token} ] ".format(**d)
+        d["flags"] = " && ".join(
+            [" [ -f {:s} ] ".format(i) for i in d["files_list"]]
+        ) + " && [ ! -f {token} ] ".format(**d)
         cmd = """
             {flags} &&
             dt1=`date +%y%m%d_%H%M%S` && 
@@ -419,7 +460,9 @@ def get_cmd(d):
             dt2=`date +%y%m%d_%H%M%S` &&
             echo $dt1 $dt2 > {token} ||
             echo "TOKEN SKIPPED {token}"
-            """.format(**d)
+            """.format(
+            **d
+        )
     return cmd
 
 
@@ -434,7 +477,9 @@ def clear_after_competion(d):
             {gatk_AR_SNP_vcf} {gatk_AR_INDEL_vcf}
             {gatk_SV_SNP_raw_vcf}  {gatk_SV_INDEL_raw_vcf}
             {vcf_vcftools_concat}
-            """.format(**d)
+            """.format(
+            **d
+        )
         # {gatk_SV_SNP_fil_vcf} {gatk_SV_INDEL_fil_vcf} # for vcftools concatenate - sometimes library doesnt loaded well
     else:
         cmd = ""
@@ -451,7 +496,9 @@ def get_cmd_bwa_mem_sam(d):
 
 
 def bash_bwa_mem_sam(d):
-    return """{bwa} mem -M -t {number_of_threads} {ref} {read1} {read2} > {sam_bwa_mem}""".format(**d)
+    return """{bwa} mem -M -t {number_of_threads} {ref} {read1} {read2} > {sam_bwa_mem}""".format(
+        **d
+    )
 
 
 ###############################################################################
@@ -464,7 +511,9 @@ def get_cmd_samtools_view_bam(d):
 
 
 def bash_samtools_view_bam(d):
-    return """{samtools} view -bT {ref} {sam_bwa_mem} > {bam_samtools_view}""".format(**d)
+    return """{samtools} view -bT {ref} {sam_bwa_mem} > {bam_samtools_view}""".format(
+        **d
+    )
 
 
 ###############################################################################
@@ -477,7 +526,9 @@ def get_cmd_samtools_sort_bam(d):
 
 
 def bash_samtools_sort_bam(d):
-    return """{samtools} sort -l 9 -O bam {bam_samtools_view} > {bam_samtools_sort}""".format(**d)
+    return """{samtools} sort -l 9 -O bam {bam_samtools_view} > {bam_samtools_sort}""".format(
+        **d
+    )
 
 
 ###############################################################################
@@ -505,7 +556,9 @@ def bash_picard_ARRG_bam(d):
         CREATE_INDEX=true
         VALIDATION_STRINGENCY=LENIENT
         MAX_RECORDS_IN_RAM=1000000
-        """.format(**d)
+        """.format(
+        **d
+    )
     # TMP_DIR={tmp_dir}
 
 
@@ -529,7 +582,9 @@ def bash_picard_MD_bam(d):
         CREATE_INDEX=true
         VALIDATION_STRINGENCY=LENIENT
         MAX_FILE_HANDLES_FOR_READ_ENDS_MAP=1000
-        """.format(**d)
+        """.format(
+        **d
+    )
     # TMP_DIR={tmp_dir}
 
 
@@ -574,7 +629,9 @@ def bash_gatk_BR_table(d):
         -knownSites {gold_indel}
         -knownSites {oneKG_indel}
         -o {table_gatk_BR}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -597,7 +654,9 @@ def bash_gatk_BR_BQSR_table(d):
         -knownSites {oneKG_indel}
         -BQSR {table_gatk_BR}
         -o {table_gatk_BR_BQSR}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -617,7 +676,9 @@ def bash_gatk_AC_pdf(d):
         -before {table_gatk_BR}
         -after {table_gatk_BR_BQSR}
         -plots {pdf_gatk_AC}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -637,7 +698,9 @@ def bash_gatk_PR_bam(d):
         -I {bam_picard_MD}
         -BQSR {table_gatk_BR_BQSR}
         -o {bam_gatk_PR_BR_BQSR}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -660,7 +723,9 @@ def bash_gatk_HC_vcf(d):
         -stand_call_conf 30
         -o {vcf_gatk_HC}
         -nct {number_of_threads}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -685,7 +750,9 @@ def bash_gatk_UG_vcf(d):  # not tested, not STEP_3
         -nct {number_of_threads}
         --max_num_PL_values 100
         --min_base_quality_score 17
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -718,13 +785,19 @@ def bash_gatk_VR_SNP_recal_tranches(d):
         -recalFile {recal_gatk_VR_SNP}
         -tranchesFile {tranches_gatk_VR_SNP}
         -rscriptFile {plots_gatk_VR_SNP}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
 def get_cmd_gatk_AR_SNP_vcf(d):
     d["token_suffix"] = "vcf_recal_tranches_2_vcf_gatk_AR_SNP"
-    d["files_list"] = [d["vcf_gatk_HC"], d["recal_gatk_VR_SNP"], d["tranches_gatk_VR_SNP"]]
+    d["files_list"] = [
+        d["vcf_gatk_HC"],
+        d["recal_gatk_VR_SNP"],
+        d["tranches_gatk_VR_SNP"],
+    ]
     d["out_file"] = d["vcf_gatk_AR_SNP"]
     d["main_cmd"] = bash_gatk_AR_SNP_vcf(d)
     return get_cmd(d)
@@ -741,7 +814,9 @@ def bash_gatk_AR_SNP_vcf(d):
         -recalFile {recal_gatk_VR_SNP}
         -tranchesFile {tranches_gatk_VR_SNP}
         -o {vcf_gatk_AR_SNP}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -770,13 +845,19 @@ def bash_gatk_VR_INDEL_recal_tranches(d):
         -recalFile {recal_gatk_VR_INDEL}
         -tranchesFile {tranches_gatk_VR_INDEL}
         -rscriptFile {plots_gatk_VR_INDEL}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
 def get_cmd_gatk_AR_INDEL_vcf(d):
     d["token_suffix"] = "vcf_recal_tranches_2_vcf_gatk_AR_INDEL"
-    d["files_list"] = [d["vcf_gatk_AR_SNP"], d["recal_gatk_VR_INDEL"], d["tranches_gatk_VR_INDEL"]]
+    d["files_list"] = [
+        d["vcf_gatk_AR_SNP"],
+        d["recal_gatk_VR_INDEL"],
+        d["tranches_gatk_VR_INDEL"],
+    ]
     d["out_file"] = d["vcf_gatk_AR_INDEL"]
     d["main_cmd"] = bash_gatk_AR_INDEL_vcf(d)
     return get_cmd(d)
@@ -793,7 +874,9 @@ def bash_gatk_AR_INDEL_vcf(d):
         -recalFile {recal_gatk_VR_INDEL}
         -tranchesFile {tranches_gatk_VR_INDEL}
         -o {vcf_gatk_AR_INDEL}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -813,7 +896,9 @@ def bash_gatk_SV_SNP_raw_vcf(d):
         -V {vcf_gatk_AR_INDEL}
         -selectType SNP
         -o {vcf_gatk_SV_SNP_raw}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -834,7 +919,9 @@ def bash_gatk_VF_SNP_fil_vcf(d):
         --filterExpression "QD < 2.0 || FS > 60.0 || MQ < 40.0 || MQRankSum < -12.5 || ReadPosRankSum < -8.0"
         --filterName "SNP_FAIL"
         -o {vcf_gatk_SV_SNP_fil}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -854,7 +941,9 @@ def bash_gatk_SV_INDEL_raw_vcf(d):
         -V {vcf_gatk_AR_INDEL}
         -selectType INDEL
         -o {vcf_gatk_SV_INDEL_raw}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -875,7 +964,9 @@ def bash_gatk_VF_INDEL_fil_vcf(d):
         --filterExpression "QD < 2.0 || FS > 200.0 || ReadPosRankSum < -20.0"
         --filterName "INDEL_FAIL"
         -o {vcf_gatk_SV_INDEL_fil}
-        """.format(**d)
+        """.format(
+        **d
+    )
 
 
 ###############################################################################
@@ -888,7 +979,9 @@ def get_cmd_vcf_concat(d):
 
 
 def bash_vcf_concat(d):
-    return """{vcf_concat} {vcf_gatk_SV_SNP_fil} {vcf_gatk_SV_INDEL_fil} > {vcf_vcftools_concat}""".format(**d)
+    return """{vcf_concat} {vcf_gatk_SV_SNP_fil} {vcf_gatk_SV_INDEL_fil} > {vcf_vcftools_concat}""".format(
+        **d
+    )
 
 
 ###############################################################################
@@ -901,7 +994,9 @@ def get_cmd_vcf_sort(d):
 
 
 def bash_vcf_sort(d):
-    return """cat {vcf_vcftools_concat} | {vcf_sort} > {vcf_vcftools_sorted}""".format(**d)
+    return """cat {vcf_vcftools_concat} | {vcf_sort} > {vcf_vcftools_sorted}""".format(
+        **d
+    )
 
 
 ###############################################################################
