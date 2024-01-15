@@ -48,12 +48,17 @@ def parse_arguments_to_settings():
     else:
         settings = dict()
     if args.samples_txt:
+        sample = os.path.splitext(os.path.basename(args.samples_txt))[0]
+        settings["sample"] = f"MSAP_{sample}"
+
         samples = [line.strip() for line in open(args.samples_txt)]
         settings["samples"] = samples
 
+    else:
+        raise Exception("No --samples_txt file provided")
+
     settings["read1"] = ""
     settings["read2"] = ""
-    settings["sample"] = "MSAP"
 
     return settings
 
@@ -69,7 +74,7 @@ def prepare_msap_sh(settings):
         os.path.join(project_dir, s, f"{s}.gatk_PR_BQSR_BR_table.bam")
         for s in d["samples"]
     ]
-    d["input_bams"] = ' '.join([f"-I {bam}" for bam in bam_files])
+    d["input_bams"] = " ".join([f"-I {bam}" for bam in bam_files])
 
     script_name = f"{sample}.sh"
     script_file = os.path.join(script_dir, script_name)
